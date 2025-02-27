@@ -82,7 +82,9 @@ void moveForward(int percent, int inches) {
 
     //Set both motors to desired percent
     leftMotor.SetPercent(percent * leftReverse);
+    LCD.WriteLine(percent * leftReverse);
     rightMotor.SetPercent(percent * (rightReverse * 7));
+    LCD.WriteLine(percent * (rightReverse * 7));
     
     //While the average of the left and right encoder is less than counts,
     //keep running motors
@@ -93,6 +95,7 @@ void moveForward(int percent, int inches) {
     //Turn off motors
     rightMotor.Stop();
     leftMotor.Stop();
+    LCD.WriteLine("Stopped");
 }
 
 void turn(int percent, int direction, int degrees) {
