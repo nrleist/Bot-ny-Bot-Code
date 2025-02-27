@@ -42,7 +42,7 @@ const int spinReverse = 0;
 #define PI 3.1415926
 
 // Function declarations here
-void waitForTouch(string prgName);
+void waitForTouch(char prgName[100]);
 void moveForward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
 
@@ -62,7 +62,7 @@ int main(void)
 }
 
 // Function definitions here
-void waitForTouch(char prgName[]) {
+void waitForTouch(char prgName[100]) {
     float x, y;
 
     LCD.Clear(BLACK);
