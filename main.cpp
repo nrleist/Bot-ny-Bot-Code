@@ -35,8 +35,8 @@ const int rightReverse = 1;
 const int spinReverse = 0;
 
 // TODO: Get drivetrain width and test counts.
-#define COUNTS_PER_INCH_RIGHT 43
-#define COUNTS_PER_INCH_LEFT 43
+#define COUNTS_PER_INCH_RIGHT 21
+#define COUNTS_PER_INCH_LEFT 21
 #define DRIVETRAIN_WIDTH 7
 
 #define PI 3.1415926
@@ -83,7 +83,7 @@ void moveForward(int percent, int inches) {
     //Set both motors to desired percent
     leftMotor.SetPercent(percent * leftReverse);
     LCD.WriteLine(percent * leftReverse);
-    rightMotor.SetPercent(percent * (rightReverse) + 7);
+    rightMotor.SetPercent(percent * (rightReverse) + 0);
     LCD.WriteLine(percent * (rightReverse));
     
     //While the average of the left and right encoder is less than counts,
