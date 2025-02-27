@@ -52,13 +52,9 @@ int main(void)
 
     // TODO: Write Steps for Milestone 1
 
-    leftMotor.SetPercent(20);
-    rightMotor.SetPercent(25);
+    moveForward(22, 36);
 
-    Sleep(5.0);
-
-    leftMotor.Stop();
-    rightMotor.Stop();
+    
 }
 
 // Function definitions here
@@ -86,7 +82,7 @@ void moveForward(int percent, int inches) {
 
     //Set both motors to desired percent
     leftMotor.SetPercent(percent * leftReverse);
-    rightMotor.SetPercent(percent * rightReverse);
+    rightMotor.SetPercent(percent * (rightReverse * 7));
     
     //While the average of the left and right encoder is less than counts,
     //keep running motors
