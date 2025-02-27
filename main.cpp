@@ -83,14 +83,14 @@ void moveForward(int percent, int inches) {
     //Set both motors to desired percent
     leftMotor.SetPercent(percent * leftReverse);
     LCD.WriteLine(percent * leftReverse);
-    rightMotor.SetPercent(percent * (rightReverse * 7));
-    LCD.WriteLine(percent * (rightReverse * 7));
+    rightMotor.SetPercent(percent * (rightReverse) + 7);
+    LCD.WriteLine(percent * (rightReverse));
     
     //While the average of the left and right encoder is less than counts,
     //keep running motors
     //while((leftEncoder.Counts() + rightEncoder.Counts()) / 2.0 < inches * COUNTS_PER_INCH_RIGHT);
     float x, y;
-    while(!LCD.Touch(&x, &y));
+    while(true);
 
     //Turn off motors
     rightMotor.Stop();
