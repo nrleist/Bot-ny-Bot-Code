@@ -53,7 +53,7 @@ int main(void)
     // TODO: Write Steps for Milestone 1
 
     leftMotor.SetPercent(20);
-    rightMotor.SetPercent(20);
+    rightMotor.SetPercent(25);
 
     Sleep(5.0);
 
