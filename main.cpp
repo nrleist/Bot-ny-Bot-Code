@@ -35,8 +35,8 @@ const int rightReverse = 1;
 const int spinReverse = 0;
 
 // TODO: Get drivetrain width and test counts.
-#define COUNTS_PER_INCH_RIGHT 21
-#define COUNTS_PER_INCH_LEFT 21
+#define COUNTS_PER_INCH_RIGHT 15
+#define COUNTS_PER_INCH_LEFT 15
 #define DRIVETRAIN_WIDTH 7
 
 #define PI 3.1415926
