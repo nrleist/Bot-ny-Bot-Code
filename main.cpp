@@ -51,7 +51,7 @@ int main(void)
     waitForTouch("Milestone 01");
 
     // TODO: Write Steps for Milestone 1
-
+    Sleep(1.0);
     moveForward(22, 36);
 
     
@@ -86,7 +86,9 @@ void moveForward(int percent, int inches) {
     
     //While the average of the left and right encoder is less than counts,
     //keep running motors
-    while((leftEncoder.Counts() + rightEncoder.Counts()) / 2. < inches * COUNTS_PER_INCH_RIGHT);
+    //while((leftEncoder.Counts() + rightEncoder.Counts()) / 2.0 < inches * COUNTS_PER_INCH_RIGHT);
+    float x, y;
+    while(!LCD.Touch(&x, &y));
 
     //Turn off motors
     rightMotor.Stop();
