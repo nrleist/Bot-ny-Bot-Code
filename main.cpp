@@ -88,9 +88,9 @@ void moveForward(int percent, int inches) {
     
     //While the average of the left and right encoder is less than counts,
     //keep running motors
-    //while((leftEncoder.Counts() + rightEncoder.Counts()) / 2.0 < inches * COUNTS_PER_INCH_RIGHT);
-    float x, y;
-    while(true);
+    while((leftEncoder.Counts() + rightEncoder.Counts()) / 2.0 < inches * COUNTS_PER_INCH_RIGHT);
+    //float x, y;
+    //while(true);
 
     //Turn off motors
     rightMotor.Stop();
