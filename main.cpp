@@ -30,8 +30,8 @@ AnalogInputPin rightOpto(FEHIO::P1_0);
 AnalogInputPin lightSenor(FEHIO::P1_4);
 
 // Values to reverse motors
-const int leftReverse = 0;
-const int rightReverse = 0;
+const int leftReverse = 1;
+const int rightReverse = 1;
 const int spinReverse = 0;
 
 // TODO: Get drivetrain width and test counts.
