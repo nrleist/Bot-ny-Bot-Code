@@ -51,6 +51,14 @@ int main(void)
     waitForTouch("Milestone 01");
 
     // TODO: Write Steps for Milestone 1
+
+    leftMotor.SetPercent(20);
+    rightMotor.SetPercent(20);
+
+    Sleep(5.0);
+
+    leftMotor.Stop();
+    rightMotor.Stop();
 }
 
 // Function definitions here
