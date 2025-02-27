@@ -15,7 +15,7 @@ using namespace std;
 //Declarations for encoders & motors 
 DigitalEncoder leftEncoder(FEHIO::P0_0);
 DigitalEncoder rightEncoder(FEHIO::P3_7);
-FEHMotor leftMotor(FEHMotor::Motor3, 9.0);
+FEHMotor leftMotor(FEHMotor::Motor0, 9.0);
 FEHMotor rightMotor(FEHMotor::Motor1, 9.0);
 FEHMotor spinner(FEHMotor::Motor2, 5.0);  // TODO: Check max volts for CRS
 
