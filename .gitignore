@@ -1,0 +1,5 @@
+fehproteusfirmware/
+*.o
+*.d
+*.exe
+.DS_Store
