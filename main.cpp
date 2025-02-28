@@ -49,7 +49,7 @@ void turn(int percent, int direction, int degrees);
 
 int main(void)
 {
-    waitForTouch("Milestone 01 Part 2");
+    waitForTouch("Milestone 01 Part 1");
 
     // TODO: Write Steps for Milestone 1
     Sleep(1.0);
