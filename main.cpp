@@ -44,6 +44,7 @@ const int spinReverse = 0;
 // Function declarations here
 void waitForTouch(char prgName[]);
 void moveForward(int percent, int inches);
+void moveBackward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
 
 int main(void)
