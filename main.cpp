@@ -59,7 +59,7 @@ int main(void)
 
     // TODO: Write Steps for Milestone 1
     Sleep(1.0);
-    moveBackward(30, 24);
+    moveBackward(40, 24);
     Sleep(1.0);
     moveForward(20, 24);
 
