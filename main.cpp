@@ -46,22 +46,25 @@ void waitForTouch(char prgName[]);
 void moveForward(int percent, int inches);
 void moveBackward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
+void stopMotors();
 
 int main(void)
 {
-    waitForTouch("Milestone 01 Part 1");
+    waitForTouch("Milestone 01");
 
     // TODO: Write Steps for Milestone 1
     Sleep(1.0);
-    moveForward(22, 34);
+    moveForward(22, 36);
 
-    waitForTouch("Milestone 01 Part 2");
+    //waitForTouch("Milestone 01 Part 2");
+    LCD.WriteLine("25 seconds until pt 2");
+    Sleep(25.0);
 
     // TODO: Write Steps for Milestone 1
     Sleep(1.0);
-    moveBackward(40, 24);
+    moveForward(40, 32);
     Sleep(1.0);
-    moveForward(20, 24);
+    moveBackward(20, 32);
 
     
 }
@@ -92,7 +95,7 @@ void moveForward(int percent, int inches) {
     //Set both motors to desired percent
     leftMotor.SetPercent(percent * leftReverse);
     LCD.WriteLine(percent * leftReverse);
-    rightMotor.SetPercent(percent * (rightReverse) + 3);
+    rightMotor.SetPercent((percent * (rightReverse)) * 1.11);
     LCD.WriteLine(percent * (rightReverse));
     
     //While the average of the left and right encoder is less than counts,
@@ -102,8 +105,7 @@ void moveForward(int percent, int inches) {
     //while(true);
 
     //Turn off motors
-    rightMotor.Stop();
-    leftMotor.Stop();
+    stopMotors();
     LCD.WriteLine("Stopped");
 }
 
@@ -115,7 +117,7 @@ void moveBackward(int percent, int inches) {
     //Set both motors to desired percent
     leftMotor.SetPercent(-1 * (percent * leftReverse));
     LCD.WriteLine(percent * leftReverse);
-    rightMotor.SetPercent(-1 *(percent * (rightReverse) + 2));
+    rightMotor.SetPercent((-1 *(percent * (rightReverse))) * 1.11);
     LCD.WriteLine(percent * (rightReverse));
     
     //While the average of the left and right encoder is less than counts,
@@ -125,8 +127,7 @@ void moveBackward(int percent, int inches) {
     //while(true);
 
     //Turn off motors
-    rightMotor.Stop();
-    leftMotor.Stop();
+    stopMotors();
     LCD.WriteLine("Stopped");
 }
 
@@ -147,5 +148,10 @@ void turn(int percent, int direction, int degrees) {
     //Turn off motors
     rightMotor.Stop();
     leftMotor.Stop();
+}
+
+void stopMotors() {
+    leftMotor.Stop();
+    rightMotor.Stop();
 }
 
