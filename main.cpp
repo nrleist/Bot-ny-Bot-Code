@@ -63,7 +63,7 @@ class Telemetry {
             col = 0;
         }
 
-        void writeLine(char* text[]) {
+        void writeLine(char text[]) {
             LCD.WriteRC(text, row, col);
             row++;
             col = 0;
@@ -81,22 +81,89 @@ class Telemetry {
             col = 0;
         }
 
-        void writeLine(bool otpt) {
-            LCD.WriteRC(otpt, row, col);
+        void writeLine(bool otpn) {
+            LCD.WriteRC(otpn, row, col);
             row++;
             col = 0;
         }
 
-        // TODO: Make standard write functions
+        void write(char text[]) {
+            LCD.WriteRC(text, row, col);
+            col = (col + strlen(text)) % 26;
+            row += ((strlen(text)) / 26);
+        }
+
+        void write(int num) {
+            LCD.WriteRC(num, row, col);
+            char text[40];
+            itoa(num, text, 10);
+            col = (col + strlen(text)) % 26;
+            row += ((strlen(text)) / 26);
+        }
+
+        void write(float num) {
+            LCD.WriteRC(num, row, col);
+            char text[400];
+            itoa(num, text, 10);
+            col = (col + strlen(text)) % 26;
+            row += ((strlen(text)) / 26);
+        }
+
+        void write(bool optn) {
+            LCD.WriteRC(optn, row, col);
+            char text[400];
+            itoa(optn, text, 10);
+            col = (col + strlen(text)) % 26;
+            row += ((strlen(text)) / 26);
+        }
+
+        void setCursor(int row, int col) {
+            this -> row = row;
+            this -> col = col;
+        }
+
+        void writeAt(char text[], int row, int col) {
+            setCursor(row, col);
+            write(text);
+        }
+
+        void writeAt(int num, int row, int col) {
+            setCursor(row, col);
+            write(num);
+        }
+
+        void writeAt(float num, int row, int col) {
+            setCursor(row, col);
+            write(num);
+        }
+
+        void writeAt(bool optn, int row, int col) {
+            setCursor(row, col);
+            write(optn);
+        }
 };
+
+// Class objects here
+Telemetry telemetry;
 
 
 int main(void)
 {
     waitForTouch("Encoders Test");
     Sleep(5.0);
+    telemetry.writeLine("Testing telemetry");
+    Sleep(3.0);
+    telemetry.writeLine("I luv telemetry.");
+    Sleep(2.0);
+    telemetry.clear();
+    Sleep(1.0);
+    telemetry.write("Number Test: ");
+    telemetry.writeLine(true);
+    Sleep(1.0);
     stopRun();
 }
+
+
 
 // Function definitions here
 void waitForTouch(char prgName[]) {
