@@ -49,6 +49,7 @@ void moveBackward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
 void stopMotors();
 
+// Class definitions here
 class Telemetry {
     private:
         int row = 4;
@@ -187,7 +188,6 @@ void stopRun() {
     LCD.WriteRC(" Stopped               ", 2, 0);
 }
 
-
 void moveForward(int percent, int inches) {
     //Reset encoder counts
     leftEncoder.ResetCounts();
@@ -256,3 +256,34 @@ void stopMotors() {
     rightMotor.Stop();
 }
 
+// Encoder Test code
+
+void setMotorsPercent(float p) {
+    leftMotor.SetPercent(p);
+    rightMotor.SetPercent(p);
+}
+
+void resetEncoders() {
+    leftEncoder.ResetCounts();
+    rightEncoder.ResetCounts();
+}
+
+void encoderTest() {
+    for(int i = 5; i < 55; i += 5) {
+        telemetry.clear();
+        telemetry.write("Running Motors at: ");
+        telemetry.writeLine(i);
+
+        resetEncoders();
+        setMotorsPercent(i);
+
+        Sleep(4.0);
+
+        stopMotors();
+        telemetry.write("Left Encoder Counts: ");
+        telemetry.writeLine(leftEncoder.Counts());
+        telemetry.write("Right Encoder Counts: ");
+        telemetry.writeLine(rightEncoder.Counts());
+        Sleep(2.0);
+    }
+}
