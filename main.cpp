@@ -13,7 +13,7 @@
 using namespace std;
 
 //Declarations for encoders & motors 
-DigitalEncoder leftEncoder(FEHIO::P3_6);
+DigitalEncoder leftEncoder(FEHIO::P3_0);
 DigitalEncoder rightEncoder(FEHIO::P0_0);
 FEHMotor leftMotor(FEHMotor::Motor0, 9.0);
 FEHMotor rightMotor(FEHMotor::Motor1, 9.0);
@@ -35,6 +35,13 @@ const int rightReverse = 1;
 const int spinReverse = 0;
 
 // TODO: Get drivetrain width and test counts.
+// Hardware Config
+
+#define PI 3.1415926
+
+#define COUNTS_PER_REV 318
+#define WHEEL_DIAMETER 2.5
+const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER; 
 #define COUNTS_PER_INCH_RIGHT 17
 #define COUNTS_PER_INCH_LEFT 17
 #define DRIVETRAIN_WIDTH 7
@@ -48,6 +55,7 @@ void moveForward(int percent, int inches);
 void moveBackward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
 void stopMotors();
+void encoderTest();
 
 // Class definitions here
 class Telemetry {
@@ -151,16 +159,8 @@ Telemetry telemetry;
 int main(void)
 {
     waitForTouch("Encoders Test");
-    Sleep(5.0);
-    telemetry.writeLine("Testing telemetry");
-    Sleep(3.0);
-    telemetry.writeLine("I luv telemetry.");
     Sleep(2.0);
-    telemetry.clear();
-    Sleep(1.0);
-    telemetry.write("Number Test: ");
-    telemetry.writeLine(true);
-    Sleep(1.0);
+    encoderTest();
     stopRun();
 }
 
@@ -263,12 +263,20 @@ void setMotorsPercent(float p) {
     rightMotor.SetPercent(p);
 }
 
+void setMotorsPercent(float pl, float pr) {
+    leftMotor.SetPercent(pl);
+    rightMotor.SetPercent(pr);
+}
+
 void resetEncoders() {
     leftEncoder.ResetCounts();
     rightEncoder.ResetCounts();
 }
 
 void encoderTest() {
+
+    FEHFile * fptr = SD.FOpen("et.txt", "w");
+
     for(int i = 5; i < 55; i += 5) {
         telemetry.clear();
         telemetry.write("Running Motors at: ");
@@ -280,10 +288,90 @@ void encoderTest() {
         Sleep(4.0);
 
         stopMotors();
+
+        int leftCounts = leftEncoder.Counts();
+        int rightCounts = rightEncoder.Counts();
         telemetry.write("Left Encoder Counts: ");
-        telemetry.writeLine(leftEncoder.Counts());
+        telemetry.writeLine(leftCounts);
         telemetry.write("Right Encoder Counts: ");
-        telemetry.writeLine(rightEncoder.Counts());
+        telemetry.writeLine(rightCounts);
+        SD.FPrintf(fptr, "%d %d %d\n", i, leftCounts, rightCounts);
         Sleep(2.0);
     }
+
+    SD.FClose(fptr);
 }
+
+// Drive code
+
+void rightMotorCorrection(int pwr) {
+
+}
+
+int getLeftMotorPwr(float speed) {
+
+}
+
+int getRightMotorPwr(float speed) {
+
+}
+
+int getEncoderCountsLeft(float dist) {
+    return (dist / WHEEL_CIRCUMFERENCE) * COUNTS_PER_REV;
+    //return LEFT_COUNTS_PER_INCH * dist;
+}
+
+int getEncoderCountsRight(float dist) {
+    return (dist / WHEEL_CIRCUMFERENCE) * COUNTS_PER_REV;
+    //return LEFT_COUNTS_PER_INCH * dist;
+}
+
+bool checkLeftCounts(int targetCounts) {
+    return abs(leftEncoder.Counts()) < targetCounts;
+}
+
+bool checkRightCounts(int targetCounts) {
+    return abs(rightEncoder.Counts()) < targetCounts;
+}
+
+bool isNotTimeout(float startTime, float duration) {
+    return ((TimeNow() - startTime) > duration);
+}
+
+bool driveForward(float dist, float speed, float timeout) {
+    resetEncoders();
+
+    int leftTargetCounts = getEncoderCountsLeft(dist);
+    int rightTargetCounts = getEncoderCountsRight(dist);
+
+    int leftPwr = getLeftMotorPwr(speed) * leftReverse;
+    int rightPwr = getRightMotorPwr(speed) * rightReverse;
+
+    float startTime = TimeNow();
+    setMotorsPercent(leftPwr, rightPwr);
+
+    while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
+            && isNotTimeout(startTime, timeout));
+
+    stopMotors();
+    return isNotTimeout(startTime, timeout + .001);
+
+
+}
+
+bool driveBackward(float dist, float speed, float timeout) {
+
+}
+
+bool turnRight(float deg, float speed, float timeout) {
+
+}
+
+bool turnLeft(float def, float speed, float timeout) {
+
+}
+
+bool prgActive() {
+    return true;
+}
+
