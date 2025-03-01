@@ -43,30 +43,59 @@ const int spinReverse = 0;
 
 // Function declarations here
 void waitForTouch(char prgName[]);
+void stopRun();
 void moveForward(int percent, int inches);
 void moveBackward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
 void stopMotors();
 
+class Telemetry {
+    private:
+        int row = 4;
+        int col = 0;
+
+    public:
+        void clear() {
+            for(int i = 4; i <= 13; i++) {
+                LCD.WriteRC("                          ", i, 0);
+            }
+            row = 4;
+            col = 0;
+        }
+
+        void writeLine(char* text[]) {
+            LCD.WriteRC(text, row, col);
+            row++;
+            col = 0;
+        }
+
+        void writeLine(int num) {
+            LCD.WriteRC(num, row, col);
+            row++;
+            col = 0;
+        }
+
+        void writeLine(float num) {
+            LCD.WriteRC(num, row, col);
+            row++;
+            col = 0;
+        }
+
+        void writeLine(bool otpt) {
+            LCD.WriteRC(otpt, row, col);
+            row++;
+            col = 0;
+        }
+
+        // TODO: Make standard write functions
+};
+
+
 int main(void)
 {
-    waitForTouch("Milestone 01");
-
-    // TODO: Write Steps for Milestone 1
-    Sleep(1.0);
-    moveForward(22, 36);
-
-    //waitForTouch("Milestone 01 Part 2");
-    LCD.WriteLine("25 seconds until pt 2");
-    Sleep(25.0);
-
-    // TODO: Write Steps for Milestone 1
-    Sleep(1.0);
-    moveForward(40, 32);
-    Sleep(1.0);
-    moveBackward(20, 32);
-
-    
+    waitForTouch("Encoders Test");
+    Sleep(5.0);
+    stopRun();
 }
 
 // Function definitions here
@@ -75,15 +104,20 @@ void waitForTouch(char prgName[]) {
 
     LCD.Clear(BLACK);
     LCD.SetFontColor(WHITE);
+    LCD.WriteLine("Team F3 -- Bot'ny Bots");
     LCD.WriteLine(prgName);
-    LCD.WriteLine("Touch the screen");
+    LCD.WriteLine("Pre-Run: Touch the screen");
+    LCD.WriteLine("/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\");
 
     while(!LCD.Touch(&x,&y)); //Wait for screen to be pressed
     while(LCD.Touch(&x,&y)); //Wait for screen to be unpressed
 
-    LCD.Clear();
-    LCD.WriteLine(prgName);
-    LCD.WriteLine("Running...");
+    LCD.WriteRC(" Running...               ", 2, 0);
+}
+
+void stopRun() {
+    stopMotors();
+    LCD.WriteRC(" Stopped               ", 2, 0);
 }
 
 
