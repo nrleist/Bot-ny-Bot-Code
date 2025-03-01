@@ -3,3 +3,9 @@ fehproteusfirmware/
 *.d
 *.exe
 .DS_Store
+
+main.o
+main.d
+Proteus.elf
+Proteus.map
+Proteus.s19
