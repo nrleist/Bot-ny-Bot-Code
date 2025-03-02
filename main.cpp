@@ -34,7 +34,7 @@ const int leftReverse = 1;
 const int rightReverse = 1;
 const int spinReverse = 1;
 
-// TODO: Get drivetrain width and test counts.
+// TODO: Get test counts.
 
 #define PI 3.1415926
 
