@@ -32,21 +32,19 @@ AnalogInputPin lightSenor(FEHIO::P1_4);
 // Values to reverse motors
 const int leftReverse = 1;
 const int rightReverse = 1;
-const int spinReverse = 0;
+const int spinReverse = 1;
 
 // TODO: Get drivetrain width and test counts.
-// Hardware Config
 
 #define PI 3.1415926
 
+// Hardware Config
 #define COUNTS_PER_REV 318
 #define WHEEL_DIAMETER 2.5
 const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER; 
 #define COUNTS_PER_INCH_RIGHT 17
 #define COUNTS_PER_INCH_LEFT 17
-#define DRIVETRAIN_WIDTH 7
-
-#define PI 3.1415926
+#define DRIVETRAIN_WIDTH 8.5
 
 // Function declarations here
 void waitForTouch(char prgName[]);
@@ -56,6 +54,22 @@ void moveBackward(int percent, int inches);
 void turn(int percent, int direction, int degrees);
 void stopMotors();
 void encoderTest();
+
+// Drive Prototypes
+float rightMotorCorrection(float pwr);
+float getLeftMotorPwr(float speed);
+float getRightMotorPwr(float speed);
+int getEncoderCountsLeft(float dist);
+int getEncoderCountsRight(float dist);
+bool checkLeftCounts(int targetCounts);
+bool checkRightCounts(int targetCounts);
+bool isNotTimeout(float startTime, float duration);
+bool driveForward(float dist, float speed, float timeout);
+bool driveBackward(float dist, float speed, float timeout);
+float calculateTurnDist(float degrees);
+bool turnLeft(float deg, float speed, float timeout);
+bool turnRight(float deg, float speed, float timeout);
+bool prgActive();
 
 // Class definitions here
 class Telemetry {
@@ -158,9 +172,23 @@ Telemetry telemetry;
 
 int main(void)
 {
-    waitForTouch("Encoders Test");
+    waitForTouch("Drive Test");
     Sleep(2.0);
-    encoderTest();
+    
+    driveForward(18, 10, 5);
+    Sleep(1.0);
+    turnLeft(90, 45, 5);
+    Sleep(1.0);
+    driveForward(18, 10, 5);
+    Sleep(1.0);
+    turnLeft(90, 45, 5);
+    Sleep(1.0);
+    driveForward(18, 10, 5);
+    Sleep(1.0);
+    turnLeft(90, 45, 5);
+    Sleep(1.0);
+    driveForward(18, 10, 5);
+    
     stopRun();
 }
 
@@ -304,16 +332,17 @@ void encoderTest() {
 
 // Drive code
 
-void rightMotorCorrection(int pwr) {
-
+float rightMotorCorrection(float pwr) {
+    return pwr * .15; // TODO: Dervive better correction equation
 }
 
-int getLeftMotorPwr(float speed) {
-
+float getLeftMotorPwr(float speed) {
+    return (speed / WHEEL_CIRCUMFERENCE) * 32.15;
 }
 
-int getRightMotorPwr(float speed) {
-
+float getRightMotorPwr(float speed) {
+    float leftPower = getLeftMotorPwr(speed);
+    return leftPower + rightMotorCorrection(leftPower);
 }
 
 int getEncoderCountsLeft(float dist) {
@@ -335,7 +364,7 @@ bool checkRightCounts(int targetCounts) {
 }
 
 bool isNotTimeout(float startTime, float duration) {
-    return ((TimeNow() - startTime) > duration);
+    return ((TimeNow() - startTime) < duration);
 }
 
 bool driveForward(float dist, float speed, float timeout) {
@@ -351,24 +380,76 @@ bool driveForward(float dist, float speed, float timeout) {
     setMotorsPercent(leftPwr, rightPwr);
 
     while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
-            && isNotTimeout(startTime, timeout));
+            && isNotTimeout(startTime, timeout) && prgActive());
 
     stopMotors();
     return isNotTimeout(startTime, timeout + .001);
-
-
 }
 
 bool driveBackward(float dist, float speed, float timeout) {
+    resetEncoders();
 
+    int leftTargetCounts = getEncoderCountsLeft(dist);
+    int rightTargetCounts = getEncoderCountsRight(dist);
+
+    int leftPwr = -getLeftMotorPwr(speed) * leftReverse;
+    int rightPwr = -getRightMotorPwr(speed) * rightReverse;
+
+    float startTime = TimeNow();
+    setMotorsPercent(leftPwr, rightPwr);
+
+    while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
+            && isNotTimeout(startTime, timeout) && prgActive());
+
+    stopMotors();
+    return isNotTimeout(startTime, timeout + .001);
 }
+
+float calculateTurnDist(float degrees) {
+    return float((PI * DRIVETRAIN_WIDTH) * (degrees / 360.0));
+}
+
+bool turnLeft(float deg, float speed, float timeout) {
+    resetEncoders();
+    float turnDist = calculateTurnDist(deg);
+    float linearSpeed = turnDist / (deg / speed); 
+
+    int leftTargetCounts = getEncoderCountsLeft(turnDist);
+    int rightTargetCounts = getEncoderCountsRight(turnDist);
+
+    int leftPwr = -getLeftMotorPwr(linearSpeed) * leftReverse;
+    int rightPwr = getRightMotorPwr(linearSpeed) * rightReverse;
+
+    float startTime = TimeNow();
+    setMotorsPercent(leftPwr, rightPwr);
+
+    while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
+            && isNotTimeout(startTime, timeout) && prgActive());
+
+    stopMotors();
+    return isNotTimeout(startTime, timeout + .001);
+}
+
 
 bool turnRight(float deg, float speed, float timeout) {
+    resetEncoders();
+    float turnDist = calculateTurnDist(deg);
+    float linearSpeed = turnDist / (deg / speed); 
 
-}
+    int leftTargetCounts = getEncoderCountsLeft(turnDist);
+    int rightTargetCounts = getEncoderCountsRight(turnDist);
 
-bool turnLeft(float def, float speed, float timeout) {
+    int leftPwr = getLeftMotorPwr(linearSpeed) * leftReverse;
+    int rightPwr = -getRightMotorPwr(linearSpeed) * rightReverse;
 
+    float startTime = TimeNow();
+    setMotorsPercent(leftPwr, rightPwr);
+
+    while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
+            && isNotTimeout(startTime, timeout) && prgActive());
+
+    stopMotors();
+    return isNotTimeout(startTime, timeout + .001);
 }
 
 bool prgActive() {
