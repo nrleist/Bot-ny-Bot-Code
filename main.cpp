@@ -6,11 +6,14 @@
 #include <FEHBuzzer.h>
 #include <FEHMotor.h>
 #include <FEHServo.h>
+#include <FEHRCS.h>
 
 #include <cmath>
 #include <string.h>
 #include <iostream>
 using namespace std;
+
+#define TEAM_ID_STRING "0150F3VKF"
 
 //Declarations for encoders & motors 
 DigitalEncoder leftEncoder(FEHIO::P3_0);
@@ -46,6 +49,11 @@ const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER;
 #define COUNTS_PER_INCH_LEFT 17
 #define DRIVETRAIN_WIDTH 8.5
 
+// Light Sensor Threshold Here
+#define LIGHT_ON_THRESHOLD 1.5
+#define BLUE_THRESHOLD 2.6
+#define RED_THRESHOLD 1.5
+
 // Function declarations here
 void waitForTouch(char prgName[]);
 void stopRun();
@@ -70,6 +78,10 @@ float calculateTurnDist(float degrees);
 bool turnLeft(float deg, float speed, float timeout);
 bool turnRight(float deg, float speed, float timeout);
 bool prgActive();
+
+void connectRCS();
+void waitForStartLight(char prgName[]);
+int getLightColor();
 
 // Class definitions here
 class Telemetry {
@@ -172,22 +184,10 @@ Telemetry telemetry;
 
 int main(void)
 {
-    waitForTouch("Drive Test");
-    Sleep(2.0);
+    connectRCS();
+    waitForStartLight("Milestone 02");
     
-    driveForward(18, 10, 5);
-    Sleep(1.0);
-    turnLeft(90, 45, 5);
-    Sleep(1.0);
-    driveForward(18, 10, 5);
-    Sleep(1.0);
-    turnLeft(90, 45, 5);
-    Sleep(1.0);
-    driveForward(18, 10, 5);
-    Sleep(1.0);
-    turnLeft(90, 45, 5);
-    Sleep(1.0);
-    driveForward(18, 10, 5);
+    // TODO: Write Milestone 2 Code
     
     stopRun();
 }
@@ -456,3 +456,37 @@ bool prgActive() {
     return true;
 }
 
+// Write RCS Code
+
+void connectRCS() {
+    RCS.InitializeTouchMenu(TEAM_ID_STRING);
+    Sleep(250);
+}
+
+// Write CdS Cell code 
+
+void waitForStartLight(char prgName[]) {
+    LCD.Clear(BLACK);
+    LCD.SetFontColor(WHITE);
+    LCD.WriteLine("Team F3 -- Bot'ny Bots");
+    LCD.WriteLine(prgName);
+    LCD.WriteLine("Pre-Run: Awaiting Start Light");
+    LCD.WriteLine("/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\");
+
+    while(lightSenor.Value() > LIGHT_ON_THRESHOLD) {Sleep(5);}
+
+    Sleep(500);
+    LCD.WriteRC(" Running...               ", 2, 0);
+}
+
+int getLightColor() {
+    float lightVal = lightSenor.Value();
+
+    if(lightVal > BLUE_THRESHOLD) {
+        return 1;
+    } else if(lightVal > RED_THRESHOLD) {
+        return 0;
+    } else {
+        return 0;
+    }
+}
