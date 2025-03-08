@@ -6,11 +6,14 @@
 #include <FEHBuzzer.h>
 #include <FEHMotor.h>
 #include <FEHServo.h>
+#include <FEHRCS.h>
 
 #include <cmath>
 #include <string.h>
 #include <iostream>
 using namespace std;
+
+#define TEAM_ID_STRING "0150F3VKF"
 
 //Declarations for encoders & motors 
 DigitalEncoder leftEncoder(FEHIO::P3_0);
@@ -27,7 +30,7 @@ FEHServo hookServo(FEHServo::Servo1);
 AnalogInputPin leftOpto(FEHIO::P1_0);
 AnalogInputPin centerOpto(FEHIO::P1_0);
 AnalogInputPin rightOpto(FEHIO::P1_0);
-AnalogInputPin lightSenor(FEHIO::P1_4);
+AnalogInputPin lightSenor(FEHIO::P0_1);
 
 // Values to reverse motors
 const int leftReverse = 1;
@@ -45,6 +48,13 @@ const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER;
 #define COUNTS_PER_INCH_RIGHT 17
 #define COUNTS_PER_INCH_LEFT 17
 #define DRIVETRAIN_WIDTH 8.5
+
+// Light Sensor Threshold Here
+#define LIGHT_ON_THRESHOLD 0.941
+#define BLUE_THRESHOLD 1.131
+#define RED_THRESHOLD 0.445
+
+int rampAdjust = .15;
 
 // Function declarations here
 void waitForTouch(char prgName[]);
@@ -70,6 +80,12 @@ float calculateTurnDist(float degrees);
 bool turnLeft(float deg, float speed, float timeout);
 bool turnRight(float deg, float speed, float timeout);
 bool prgActive();
+
+void connectRCS();
+void waitForStartLight(char prgName[]);
+int getLightColor();
+void lightSensorReadout();
+void cdsTest();
 
 // Class definitions here
 class Telemetry {
@@ -164,6 +180,16 @@ class Telemetry {
             setCursor(row, col);
             write(optn);
         }
+
+        void setBackgroundRed() {
+            LCD.SetBackgroundColor(RED);
+            this->clear();
+        }
+
+        void setBackgroundBlue() {
+            LCD.SetBackgroundColor(BLUE);
+            this->clear();
+        }
 };
 
 // Class objects here
@@ -172,24 +198,43 @@ Telemetry telemetry;
 
 int main(void)
 {
-    waitForTouch("Drive Test");
-    Sleep(2.0);
+    //connectRCS();
+    waitForStartLight("Milestone 02");
+
+    //waitForTouch("Testing");
     
-    driveForward(18, 10, 5);
-    Sleep(1.0);
-    turnLeft(90, 45, 5);
-    Sleep(1.0);
-    driveForward(18, 10, 5);
-    Sleep(1.0);
-    turnLeft(90, 45, 5);
-    Sleep(1.0);
-    driveForward(18, 10, 5);
-    Sleep(1.0);
-    turnLeft(90, 45, 5);
-    Sleep(1.0);
-    driveForward(18, 10, 5);
+    // TODO: Write Milestone 2 Code
+
+    driveBackward(4, 15, 0.5);
+    turnRight(80, 70, 8);
+    //driveForward(10, 10, 5);
+    rampAdjust = .30;
+    driveForward(42, 10, 8);
+    rampAdjust = .15;
+    turnLeft(100, 70, 10);
+    driveForward(12, 10, 8);
+
+    Sleep(500);
+    int color = getLightColor();
+    if(color == 1) {
+        telemetry.setBackgroundBlue();
+        turnLeft(18, 70, 5);
+        driveForward(15, 10, 5);
+    } else {
+        telemetry.setBackgroundRed();
+        turnRight(18, 70, 5);
+        driveForward(15, 10, 5);
+    }
+    LCD.SetBackgroundColor(BLACK);
+
+    Sleep(250);
+    driveBackward(20, 10, 3.0);
+    turnLeft(101, 70, 5.0);
+    rampAdjust = .30;
+    driveForward(60, 15, 10.0);
     
     stopRun();
+    
 }
 
 
@@ -333,7 +378,7 @@ void encoderTest() {
 // Drive code
 
 float rightMotorCorrection(float pwr) {
-    return pwr * .15; // TODO: Dervive better correction equation
+    return pwr * rampAdjust; // TODO: Dervive better correction equation
 }
 
 float getLeftMotorPwr(float speed) {
@@ -430,7 +475,6 @@ bool turnLeft(float deg, float speed, float timeout) {
     return isNotTimeout(startTime, timeout + .001);
 }
 
-
 bool turnRight(float deg, float speed, float timeout) {
     resetEncoders();
     float turnDist = calculateTurnDist(deg);
@@ -456,3 +500,52 @@ bool prgActive() {
     return true;
 }
 
+// Write RCS Code
+
+void connectRCS() {
+    RCS.InitializeTouchMenu(TEAM_ID_STRING);
+    Sleep(250);
+}
+
+// Write CdS Cell code 
+
+void waitForStartLight(char prgName[]) {
+    LCD.Clear(BLACK);
+    LCD.SetFontColor(WHITE);
+    LCD.WriteLine("Team F3 -- Bot'ny Bots");
+    LCD.WriteLine(prgName);
+    LCD.WriteLine("Pre-Run:Wait 4 Start Light");
+    LCD.WriteLine("/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\");
+
+    while(lightSenor.Value() > LIGHT_ON_THRESHOLD) {Sleep(5);}
+
+    Sleep(500);
+    LCD.WriteRC(" Running...               ", 2, 0);
+}
+
+int getLightColor() {
+    float lightVal = lightSenor.Value();
+
+    if(lightVal > BLUE_THRESHOLD) {
+        return 1;
+    } else if(lightVal > RED_THRESHOLD) {
+        return 0;
+    } else {
+        return 0;
+    }
+}
+
+void lightSensorReadout() {
+    telemetry.clear();
+    telemetry.write("CdS Value: ");
+    telemetry.writeLine(lightSenor.Value());
+}
+
+void cdsTest() {
+    //waitForTouch("Light Sensor Test");
+    while(true)
+    {
+        lightSensorReadout();
+        Sleep(100);
+    }
+}
