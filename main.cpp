@@ -202,8 +202,6 @@ int main(void)
     waitForStartLight("Milestone 02");
 
     //waitForTouch("Testing");
-    
-    // TODO: Write Milestone 2 Code
 
     driveBackward(4, 15, 0.5);
     turnRight(80, 70, 8);
