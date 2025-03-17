@@ -190,6 +190,11 @@ class Telemetry {
             LCD.SetBackgroundColor(BLUE);
             this->clear();
         }
+
+        void setBackgroundBlack() {
+            LCD.SetBackgroundColor(BLACK);
+            this->clear();
+        }
 };
 
 // Class objects here
@@ -199,40 +204,23 @@ Telemetry telemetry;
 int main(void)
 {
     //connectRCS();
-    waitForStartLight("Milestone 02");
+    //waitForStartLight("Milestone 03");
+    waitForTouch("Milestone 03");
 
-    //waitForTouch("Testing");
-
-    driveBackward(4, 15, 0.5);
-    turnRight(80, 70, 8);
-    //driveForward(10, 10, 5);
-    rampAdjust = .30;
-    driveForward(42, 10, 8);
-    rampAdjust = .15;
-    turnLeft(100, 70, 10);
-    driveForward(12, 10, 8);
-
-    Sleep(500);
-    int color = getLightColor();
-    if(color == 1) {
-        telemetry.setBackgroundBlue();
-        turnLeft(18, 70, 5);
-        driveForward(15, 10, 5);
-    } else {
-        telemetry.setBackgroundRed();
-        turnRight(18, 70, 5);
-        driveForward(15, 10, 5);
+    while(true) {
+        int color = getLightColor();
+        if(color == 1) {
+            telemetry.setBackgroundBlue();
+            telemetry.writeLine("Color: Blue");
+        } else {
+            telemetry.setBackgroundRed();
+            telemetry.writeLine("Color: Red");
+        }
+        telemetry.write("Value: ");
+        telemetry.writeLine(lightSenor.Value());
+        Sleep(10);
+        telemetry.clear();
     }
-    LCD.SetBackgroundColor(BLACK);
-
-    Sleep(250);
-    driveBackward(20, 10, 3.0);
-    turnLeft(101, 70, 5.0);
-    rampAdjust = .30;
-    driveForward(60, 15, 10.0);
-    
-    stopRun();
-    
 }
 
 
@@ -546,4 +534,4 @@ void cdsTest() {
         lightSensorReadout();
         Sleep(100);
     }
-}
+}
