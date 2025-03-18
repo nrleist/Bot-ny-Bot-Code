@@ -207,18 +207,29 @@ int main(void)
     waitForStartLight("Milestone 03");
     //waitForTouch("Milestone 03");
 
-    driveForward(5, 15, 1.5);
+    driveForward(4, 15, 1.1);
     driveBackward(29.5, 10, 5);
+    //turnLeft(20, 60, 3);
+    //driveBackward(4, 12, 3);
     turnLeft(48, 60, 3);
     turnRight(3, 60, 1);
     driveForward(9, 15, 3);
+    driveBackward(3, 10, 5);
+    turnRight(93, 70, 5);
+    driveForward(8, 15, 3);
+    turnLeft(93, 65, 3);
+    driveForward(21, 8, 5);
+    driveBackward(1.5, 8, 3);
+    turnLeft(92, 60, 5);
+
+    rampAdjust = .40;
+    driveForward(34, 10, 8);
+    rampAdjust = .15;
+
+    turnLeft(110, 60, 5);
+    driveBackward(5, 10, 3);
+    driveForward(18, 15, 3);
     driveBackward(4, 10, 5);
-    turnRight(90, 70, 5);
-    driveForward(10, 15, 3);
-    turnLeft(85, 65, 3);
-    driveForward(18, 8, 5);
-    driveBackward(2, 8, 3);
-    turnLeft(95, 60, 5);
 
     stopRun();
 }
