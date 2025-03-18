@@ -26,7 +26,7 @@ class FEHRCS {
    *
    * Get course number corresponding to current region
    *
-   * @return unsigned char 1 (regions A-D), 2 (regions E-H)
+   * @return unsigned char 1 (regions A-D), 2 (regions E-H), 3 (regions I-L)
    */
   unsigned char CurrentCourse();
 
@@ -86,21 +86,19 @@ class FEHRCS {
    */
   int GetLever();
 
+  // returns the number of the current course { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+  // 10, 11 }
+  int CurrentRegion();
+
+  FEHRCS();
+
+ private:
   // RCS debug/deprecated functions:
   unsigned char WaitForPacket();
   int WaitForPacketDebug(int* packetsFound,
                          int* packetsLost,
                          int* lastFoundPacketTime);
-  // returns the number of the current course { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-  // 10, 11 }
-  int CurrentRegion();
-  // Creates a menu to allow you to pick the correct region
-  // Assumes ButtonBoard is plugged into Bank3
-  // Right button increments region
-  // Left button decrements region
-  // Middle button selects region
-  void InitializeMenu(
-      const char* team_key);  // Deprecated because uses button board
+
   // Manually pick and configure a region
   // int region => { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }
   // char region => { a, b, c, d, e, f, g, h, i, j, k, l } || { A, B, C, D, E,
@@ -108,9 +106,6 @@ class FEHRCS {
   void Initialize(int region, const char* team_key);
   void Initialize(char region, const char* team_key);
 
-  FEHRCS();
-
- private:
   FEHXBee _xbee;
   int _region;
 };

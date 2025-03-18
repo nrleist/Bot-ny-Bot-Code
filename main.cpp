@@ -204,23 +204,23 @@ Telemetry telemetry;
 int main(void)
 {
     //connectRCS();
-    //waitForStartLight("Milestone 03");
-    waitForTouch("Milestone 03");
+    waitForStartLight("Milestone 03");
+    //waitForTouch("Milestone 03");
 
-    while(true) {
-        int color = getLightColor();
-        if(color == 1) {
-            telemetry.setBackgroundBlue();
-            telemetry.writeLine("Color: Blue");
-        } else {
-            telemetry.setBackgroundRed();
-            telemetry.writeLine("Color: Red");
-        }
-        telemetry.write("Value: ");
-        telemetry.writeLine(lightSenor.Value());
-        Sleep(10);
-        telemetry.clear();
-    }
+    driveForward(5, 15, 1.5);
+    driveBackward(29.5, 10, 5);
+    turnLeft(48, 60, 3);
+    turnRight(3, 60, 1);
+    driveForward(9, 15, 3);
+    driveBackward(4, 10, 5);
+    turnRight(90, 70, 5);
+    driveForward(10, 15, 3);
+    turnLeft(85, 65, 3);
+    driveForward(18, 8, 5);
+    driveBackward(2, 8, 3);
+    turnLeft(95, 60, 5);
+
+    stopRun();
 }
 
 
@@ -534,4 +534,4 @@ void cdsTest() {
         lightSensorReadout();
         Sleep(100);
     }
-}
+}
