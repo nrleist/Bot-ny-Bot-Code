@@ -15,6 +15,12 @@ using namespace std;
 
 #define TEAM_ID_STRING "0150F3VKF"
 
+enum Levers {
+    LEFT,
+    MIDDLE,
+    RIGHT
+};
+
 //Declarations for encoders & motors 
 DigitalEncoder leftEncoder(FEHIO::P3_0);
 DigitalEncoder rightEncoder(FEHIO::P0_0);
@@ -49,6 +55,9 @@ const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER;
 #define COUNTS_PER_INCH_LEFT 17
 #define DRIVETRAIN_WIDTH 8.5
 
+// Battery Max Voltage
+#define MAX_BATT_VOLTS 11.5
+
 // Light Sensor Threshold Here
 #define LIGHT_ON_THRESHOLD 0.941
 #define BLUE_THRESHOLD 1.131
@@ -58,6 +67,7 @@ int rampAdjust = .15;
 
 // Function declarations here
 void waitForTouch(char prgName[]);
+int preRun(char prgName[]);
 void stopRun();
 void moveForward(int percent, int inches);
 void moveBackward(int percent, int inches);
@@ -74,6 +84,7 @@ int getEncoderCountsRight(float dist);
 bool checkLeftCounts(int targetCounts);
 bool checkRightCounts(int targetCounts);
 bool isNotTimeout(float startTime, float duration);
+float powerAdjust(float desiredPwr);
 bool driveForward(float dist, float speed, float timeout);
 bool driveBackward(float dist, float speed, float timeout);
 float calculateTurnDist(float degrees);
@@ -90,7 +101,9 @@ void cdsTest();
 // Class definitions here
 class Telemetry {
     private:
-        int row = 4;
+        const int startRow = 5;
+
+        int row = startRow;
         int col = 0;
 
     public:
@@ -98,31 +111,39 @@ class Telemetry {
             for(int i = 4; i <= 13; i++) {
                 LCD.WriteRC("                          ", i, 0);
             }
-            row = 4;
+            row = startRow;
             col = 0;
+        }
+
+        void correctRow() {
+            if(row > 13) {row = startRow;}
         }
 
         void writeLine(char text[]) {
             LCD.WriteRC(text, row, col);
             row++;
+            correctRow();
             col = 0;
         }
 
         void writeLine(int num) {
             LCD.WriteRC(num, row, col);
             row++;
+            correctRow();
             col = 0;
         }
 
         void writeLine(float num) {
             LCD.WriteRC(num, row, col);
             row++;
+            correctRow();
             col = 0;
         }
 
         void writeLine(bool otpn) {
             LCD.WriteRC(otpn, row, col);
             row++;
+            correctRow();
             col = 0;
         }
 
@@ -130,6 +151,7 @@ class Telemetry {
             LCD.WriteRC(text, row, col);
             col = (col + strlen(text)) % 26;
             row += ((strlen(text)) / 26);
+            correctRow();
         }
 
         void write(int num) {
@@ -138,6 +160,7 @@ class Telemetry {
             itoa(num, text, 10);
             col = (col + strlen(text)) % 26;
             row += ((strlen(text)) / 26);
+            correctRow();
         }
 
         void write(float num) {
@@ -146,6 +169,7 @@ class Telemetry {
             itoa(num, text, 10);
             col = (col + strlen(text)) % 26;
             row += ((strlen(text)) / 26);
+            correctRow();
         }
 
         void write(bool optn) {
@@ -154,6 +178,7 @@ class Telemetry {
             itoa(optn, text, 10);
             col = (col + strlen(text)) % 26;
             row += ((strlen(text)) / 26);
+            correctRow();
         }
 
         void setCursor(int row, int col) {
@@ -200,34 +225,33 @@ class Telemetry {
 // Class objects here
 Telemetry telemetry;
 
+int lever;
 
 int main(void)
 {
-    //connectRCS();
-    waitForStartLight("Milestone 03");
-    //waitForTouch("Milestone 03");
+    lever = preRun("Milestone 3");
 
     driveForward(4, 15, 1.1);
+    driveBackward(2, 7, 3);
+    turnLeft(5.5, 60, 3);
     driveBackward(29.5, 10, 5);
-    //turnLeft(20, 60, 3);
-    //driveBackward(4, 12, 3);
-    turnLeft(48, 60, 3);
-    turnRight(3, 60, 1);
-    driveForward(9, 15, 3);
+    turnLeft(53, 60, 3);
+    turnRight(2.6, 60, 1);
+    driveForward(9, 18, 3);
     driveBackward(3, 10, 5);
     turnRight(93, 70, 5);
     driveForward(8, 15, 3);
     turnLeft(93, 65, 3);
     driveForward(21, 8, 5);
-    driveBackward(1.5, 8, 3);
+    driveBackward(1.15, 8, 3);
     turnLeft(92, 60, 5);
 
-    rampAdjust = .40;
-    driveForward(34, 10, 8);
+    rampAdjust = .93;
+    driveForward(30.1, 10, 8);
     rampAdjust = .15;
 
     turnLeft(110, 60, 5);
-    driveBackward(5, 10, 3);
+    driveBackward(6, 10, 3);
     driveForward(18, 15, 3);
     driveBackward(4, 10, 5);
 
@@ -237,6 +261,15 @@ int main(void)
 
 
 // Function definitions here
+
+int preRun(char prgName[]) {
+    //connectRCS();
+    waitForStartLight(prgName);
+    //waitForTouch(prgName);
+    //return RCS.GetLever();
+    return 0;
+}
+
 void waitForTouch(char prgName[]) {
     float x, y;
 
@@ -245,6 +278,9 @@ void waitForTouch(char prgName[]) {
     LCD.WriteLine("Team F3 -- Bot'ny Bots");
     LCD.WriteLine(prgName);
     LCD.WriteLine("Pre-Run: Touch the screen");
+    LCD.Write("Batt: ");
+    LCD.Write(Battery.Voltage());
+    LCD.WriteLine(" V");
     LCD.WriteLine("/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\");
 
     while(!LCD.Touch(&x,&y)); //Wait for screen to be pressed
@@ -256,18 +292,26 @@ void waitForTouch(char prgName[]) {
 void stopRun() {
     stopMotors();
     LCD.WriteRC(" Stopped               ", 2, 0);
+    LCD.WriteRC("                    ", 3, 0);
+    LCD.WriteRC("Batt: ", 3, 0);
+    LCD.WriteRC(Battery.Voltage(), 3, 6);
+    LCD.WriteRC(" V", 3, 12);
+    Buzzer.Buzz(500);
+    while(true);
 }
 
-void moveForward(int percent, int inches) {
+void moveForward(int percent, int inches) { // DEPRECIATED - Do not use unless for testing
+    telemetry.writeLine("WARNING: moveForward() method should not be used.");
+    
     //Reset encoder counts
     leftEncoder.ResetCounts();
     rightEncoder.ResetCounts();
 
     //Set both motors to desired percent
     leftMotor.SetPercent(percent * leftReverse);
-    LCD.WriteLine(percent * leftReverse);
+    //LCD.WriteLine(percent * leftReverse);
     rightMotor.SetPercent((percent * (rightReverse)) * 1.11);
-    LCD.WriteLine(percent * (rightReverse));
+    //LCD.WriteLine(percent * (rightReverse));
     
     //While the average of the left and right encoder is less than counts,
     //keep running motors
@@ -277,10 +321,12 @@ void moveForward(int percent, int inches) {
 
     //Turn off motors
     stopMotors();
-    LCD.WriteLine("Stopped");
+    //LCD.WriteLine("Stopped");
 }
 
-void moveBackward(int percent, int inches) {
+void moveBackward(int percent, int inches) { // DEPRECIATED - Do not use unless for testing
+    telemetry.writeLine("WARNING: moveBackward() method should not be used.");
+
     //Reset encoder counts
     leftEncoder.ResetCounts();
     rightEncoder.ResetCounts();
@@ -302,7 +348,9 @@ void moveBackward(int percent, int inches) {
     LCD.WriteLine("Stopped");
 }
 
-void turn(int percent, int direction, int degrees) {
+void turn(int percent, int direction, int degrees) { // DEPRECIATED - Do not use unless for testing
+    telemetry.writeLine("WARNING: turn() method should not be used.");
+
     int turnInches = float((PI * DRIVETRAIN_WIDTH) * (degrees / 360.0));
     //LCD.WriteLine("Turning");
 
@@ -329,13 +377,13 @@ void stopMotors() {
 // Encoder Test code
 
 void setMotorsPercent(float p) {
-    leftMotor.SetPercent(p);
-    rightMotor.SetPercent(p);
+    leftMotor.SetPercent(powerAdjust(p));
+    rightMotor.SetPercent(powerAdjust(p));
 }
 
 void setMotorsPercent(float pl, float pr) {
-    leftMotor.SetPercent(pl);
-    rightMotor.SetPercent(pr);
+    leftMotor.SetPercent(powerAdjust(pl));
+    rightMotor.SetPercent(powerAdjust(pr));
 }
 
 void resetEncoders() {
@@ -407,6 +455,10 @@ bool checkRightCounts(int targetCounts) {
 
 bool isNotTimeout(float startTime, float duration) {
     return ((TimeNow() - startTime) < duration);
+}
+
+float powerAdjust(float desiredPwr) {
+    return (MAX_BATT_VOLTS / Battery.Voltage()) * desiredPwr;
 }
 
 bool driveForward(float dist, float speed, float timeout) {
@@ -511,7 +563,10 @@ void waitForStartLight(char prgName[]) {
     LCD.SetFontColor(WHITE);
     LCD.WriteLine("Team F3 -- Bot'ny Bots");
     LCD.WriteLine(prgName);
-    LCD.WriteLine("Pre-Run:Wait 4 Start Light");
+    LCD.WriteLine("Pre-Run: Await Start Light");
+    LCD.Write("Batt: ");
+    LCD.Write(Battery.Voltage());
+    LCD.WriteLine(" V");
     LCD.WriteLine("/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\");
 
     while(lightSenor.Value() > LIGHT_ON_THRESHOLD) {Sleep(5);}
