@@ -9,7 +9,7 @@
 FEHRCS RCS;
 
 #define STOPDATA 0xAA
-#define REGION_COUNT 4
+#define REGION_COUNT 8
 
 void RCSDataProcess(unsigned char* data, unsigned char length);
 
@@ -321,58 +321,6 @@ void FEHRCS::Initialize(char region, const char* team_key) {
   } else if (region >= 'a' && region <= 'l') {
     Initialize((int)(region - 'a'), team_key);
   }
-}
-
-void FEHRCS::InitializeMenu(const char* team_key) {
-  ButtonBoard buttons(FEHIO::Bank3);
-
-  char region = 'A';
-
-  LCD.Clear();
-  LCD.WriteLine("Use LEFT / RIGHT to change region");
-  LCD.WriteLine("Use MIDDLE to select");
-  LCD.Write("Region: ");
-  LCD.WriteLine(region);
-
-  // wait for user to press middle button
-  while (!buttons.MiddlePressed()) {
-    if (buttons.LeftPressed()) {
-      region--;
-      if (region < 'A') {
-        region = 'L';
-      }
-      LCD.Clear();
-      LCD.WriteLine("Use LEFT / RIGHT to change region");
-      LCD.WriteLine("Use MIDDLE to select");
-      LCD.Write("Region: ");
-      LCD.WriteLine(region);
-
-      while (buttons.LeftPressed())
-        ;
-      Sleep(100);
-    }
-
-    if (buttons.RightPressed()) {
-      region++;
-      if (region > 'L') {
-        region = 'A';
-      }
-      LCD.Clear();
-      LCD.WriteLine("Use LEFT / RIGHT to change region");
-      LCD.WriteLine("Use MIDDLE to select");
-      LCD.Write("Region: ");
-      LCD.WriteLine(region);
-
-      while (buttons.RightPressed())
-        ;
-      Sleep(100);
-    }
-  }
-
-  Initialize(region, team_key);
-
-  // while( buttons.MiddlePressed() );
-  // Sleep( 1000 );
 }
 
 void FEHRCS::InitializeTouchMenu(const char* team_key) {
