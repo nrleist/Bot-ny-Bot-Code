@@ -26,11 +26,11 @@ DigitalEncoder leftEncoder(FEHIO::P3_0);
 DigitalEncoder rightEncoder(FEHIO::P0_0);
 FEHMotor leftMotor(FEHMotor::Motor0, 9.0);
 FEHMotor rightMotor(FEHMotor::Motor1, 9.0);
+
 FEHMotor spinner(FEHMotor::Motor2, 5.0);  // TODO: Check max volts for CRS
 
 // Declarations for servos
-FEHServo armServo(FEHServo::Servo0);
-FEHServo hookServo(FEHServo::Servo1);
+FEHServo armServo(FEHServo::Servo7);
 
 // Declarations for sensors
 AnalogInputPin leftOpto(FEHIO::P1_0);
@@ -229,36 +229,8 @@ int lever;
 
 int main(void)
 {
-    lever = preRun("Milestone 3");
-
-    driveForward(4, 15, 1.1);
-    driveBackward(2, 7, 3);
-    turnLeft(5.5, 60, 3);
-    driveBackward(29.5, 10, 5);
-    turnLeft(60, 60, 3);
-    turnRight(2.6, 60, 1);
-    driveForward(9, 18, 3);
-    driveBackward(3, 10, 5);
-    turnRight(93, 70, 5);
-    driveForward(8, 15, 3);
-    turnLeft(93, 65, 3);
-    driveForward(21, 8, 5);
-    driveBackward(1.15, 8, 3);
-    turnLeft(92, 60, 5);
-
-    rampAdjust = .93;
-    driveForward(34, 15, 10);
-    rampAdjust = .15;
-
-    turnLeft(4, 60, 5);
-    Sleep(100);
-    driveForward(15, 10, 7);
-    driveBackward(6.5, 10, 8);
-    turnLeft(110, 60, 5);
-    driveBackward(6, 10, 3);
-    driveForward(20, 15, 3);
-    driveBackward(4, 10, 5);
-
+    preRun("Brutus' Garden");
+    armServo.TouchCalibrate();
     stopRun();
 }
 
@@ -270,6 +242,8 @@ int preRun(char prgName[]) {
     //connectRCS();
     waitForStartLight(prgName);
     //waitForTouch(prgName);
+    //lever = RCS.GetLever();
+    lever = 0;
     //return RCS.GetLever();
     return 0;
 }
