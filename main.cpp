@@ -235,7 +235,7 @@ int main(void)
     driveBackward(2, 7, 3);
     turnLeft(5.5, 60, 3);
     driveBackward(29.5, 10, 5);
-    turnLeft(53, 60, 3);
+    turnLeft(60, 60, 3);
     turnRight(2.6, 60, 1);
     driveForward(9, 18, 3);
     driveBackward(3, 10, 5);
@@ -247,12 +247,16 @@ int main(void)
     turnLeft(92, 60, 5);
 
     rampAdjust = .93;
-    driveForward(30.1, 10, 8);
+    driveForward(34, 15, 10);
     rampAdjust = .15;
 
+    turnLeft(4, 60, 5);
+    Sleep(100);
+    driveForward(15, 10, 7);
+    driveBackward(6.5, 10, 8);
     turnLeft(110, 60, 5);
     driveBackward(6, 10, 3);
-    driveForward(18, 15, 3);
+    driveForward(20, 15, 3);
     driveBackward(4, 10, 5);
 
     stopRun();
