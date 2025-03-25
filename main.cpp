@@ -30,7 +30,7 @@ FEHMotor rightMotor(FEHMotor::Motor1, 9.0);
 FEHMotor spinner(FEHMotor::Motor2, 5.0);  // TODO: Check max volts for CRS
 
 // Declarations for servos
-FEHServo armServo(FEHServo::Servo7);
+FEHServo armServo(FEHServo::Servo6);
 
 // Declarations for sensors
 AnalogInputPin leftOpto(FEHIO::P1_0);
@@ -229,8 +229,12 @@ int lever;
 
 int main(void)
 {
-    preRun("Brutus' Garden");
-    armServo.TouchCalibrate();
+    preRun("Milestone 4");
+    armServo.SetDegree(60);
+
+    
+    Sleep(7.0);
+    armServo.SetDegree(95);
     stopRun();
 }
 
@@ -239,6 +243,9 @@ int main(void)
 // Function definitions here
 
 int preRun(char prgName[]) {
+    armServo.SetMin(970);
+    armServo.SetMax(2100);
+    armServo.SetDegree(180);
     //connectRCS();
     waitForStartLight(prgName);
     //waitForTouch(prgName);
