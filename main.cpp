@@ -40,7 +40,7 @@ AnalogInputPin lightSenor(FEHIO::P0_1);
 
 // Values to reverse motors
 const int leftReverse = 1;
-const int rightReverse = 1;
+const int rightReverse = -1;
 const int spinReverse = 1;
 
 // TODO: Get test counts.
@@ -230,11 +230,57 @@ int lever;
 int main(void)
 {
     preRun("Milestone 4");
-    armServo.SetDegree(60);
+    telemetry.write("Lever is ");
+    telemetry.writeLine(lever);
 
-    
-    Sleep(7.0);
+    armServo.SetDegree(60);
+    driveForward(4, 15, 1.1);
+    driveBackward(2, 7, 3);
+    driveBackward(14.7, 8, 4);
+    turnLeft(59, 60, 3);
+    driveBackward(5, 7, 2);
+    driveBackward(3, 4, 4);
+
+    Sleep(500);
     armServo.SetDegree(95);
+    Sleep(250);
+
+    driveForward(10, 10, 3);
+    turnRight(30, 60, 3);
+    driveForward(6, 10, 2);
+    turnLeft(30, 60, 3);
+    driveForward(12, 10, 4);
+
+    driveBackward(1.5, 10, 2);
+    turnRight(100, 60, 4);
+
+    rampAdjust = .35;
+    driveBackward(36, 15, 6);
+    rampAdjust = .15;
+
+    turnLeft(50, 60, 3);
+    driveBackward(10, 10, 3);
+    turnRight(50, 60 , 3);
+    driveBackward(12, 10, 3);
+
+    armServo.SetDegree(30);
+    driveForward(18, 10, 3);
+    turnLeft(55, 60, 2);
+    driveBackward(5, 10, 2);
+
+    /*
+    switch(lever) {
+        case LEFT:
+            return;
+        case MIDDLE:
+            return;
+        case RIGHT:
+            return;
+
+        default:
+
+    }*/
+
     stopRun();
 }
 
@@ -246,13 +292,13 @@ int preRun(char prgName[]) {
     armServo.SetMin(970);
     armServo.SetMax(2100);
     armServo.SetDegree(180);
-    //connectRCS();
+    connectRCS();
     waitForStartLight(prgName);
     //waitForTouch(prgName);
-    //lever = RCS.GetLever();
-    lever = 0;
-    //return RCS.GetLever();
-    return 0;
+    lever = RCS.GetLever();
+    //lever = 0;
+    return RCS.GetLever();
+    //return 0;
 }
 
 void waitForTouch(char prgName[]) {
@@ -276,6 +322,7 @@ void waitForTouch(char prgName[]) {
 
 void stopRun() {
     stopMotors();
+    armServo.Off();
     LCD.WriteRC(" Stopped               ", 2, 0);
     LCD.WriteRC("                    ", 3, 0);
     LCD.WriteRC("Batt: ", 3, 0);
