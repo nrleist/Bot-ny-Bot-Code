@@ -229,6 +229,7 @@ int lever;
 
 int main(void)
 {
+    rampAdjust = .17;
     preRun("Milestone 4");
     telemetry.write("Lever is ");
     telemetry.writeLine(lever);
@@ -236,13 +237,13 @@ int main(void)
     armServo.SetDegree(60);
     driveForward(4, 15, 1.1);
     driveBackward(2, 7, 3);
-    driveBackward(14.7, 8, 4);
-    turnLeft(59, 60, 3);
+    driveBackward(15, 8, 4);
+    turnLeft(57, 60, 3);
     driveBackward(5, 7, 2);
     driveBackward(3, 4, 4);
 
     Sleep(500);
-    armServo.SetDegree(95);
+    armServo.SetDegree(100);
     Sleep(250);
 
     driveForward(10, 10, 3);
@@ -254,32 +255,46 @@ int main(void)
     driveBackward(1.5, 10, 2);
     turnRight(100, 60, 4);
 
-    rampAdjust = .35;
-    driveBackward(36, 15, 6);
-    rampAdjust = .15;
+    rampAdjust = .17;
+    driveBackward(33, 18, 6);
+    rampAdjust = .17;
 
-    turnLeft(50, 60, 3);
-    driveBackward(10, 10, 3);
-    turnRight(50, 60 , 3);
-    driveBackward(12, 10, 3);
+    turnLeft(35, 60, 3);
+    driveBackward(4.5, 10, 2);
+    turnLeft(100, 60, 2);
+    driveForward(4.5, 10, 3);
+    driveBackward(7.2, 10, 3);
+    turnRight(100, 60 , 3);
+    driveBackward(17, 10, 3);
 
     armServo.SetDegree(30);
     driveForward(18, 10, 3);
     turnLeft(55, 60, 2);
-    driveBackward(5, 10, 2);
+    armServo.SetDegree(105);
+    driveBackward(10, 10, 2);
+    armServo.SetDegree(30);
+    driveForward(1, 10, 2);
+    armServo.SetDegree(20);
+    Sleep(5.0);
+    driveBackward(1, 10, 2);
+    armServo.SetDegree(100);
 
-    /*
+    int z;
     switch(lever) {
         case LEFT:
-            return;
+            z = 0;
+            break;
         case MIDDLE:
-            return;
+            z = 0;
+            break;
         case RIGHT:
-            return;
-
+            z = 0;
+            break;
         default:
+            z = 0;
+            break;
 
-    }*/
+    }
 
     stopRun();
 }
