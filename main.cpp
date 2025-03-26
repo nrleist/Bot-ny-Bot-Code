@@ -34,8 +34,8 @@ FEHMotor spinner(FEHMotor::Motor2, 5.0);  // TODO: Check max volts for CRS
 
 // Declarations for servos
 FEHServo armServo(FEHServo::Servo6);
-#define ARM_SERVO_MIN 2100
-#define ARM_SERVO_MAX 970
+#define ARM_SERVO_MIN 970
+#define ARM_SERVO_MAX 2100
 
 // Declarations for sensors
 AnalogInputPin leftOpto(FEHIO::P1_0);
@@ -153,6 +153,13 @@ class Telemetry {
             col = 0;
         }
 
+        void writeLine(double num) {
+            LCD.WriteRC(num, row, col);
+            row++;
+            correctRow();
+            col = 0;
+        }
+
         void writeLine(bool otpn) {
             LCD.WriteRC(otpn, row, col);
             row++;
@@ -177,6 +184,15 @@ class Telemetry {
         }
 
         void write(float num) {
+            LCD.WriteRC(num, row, col);
+            char text[400];
+            itoa(num, text, 10);
+            col = (col + strlen(text)) % 26;
+            row += ((strlen(text)) / 26);
+            correctRow();
+        }
+
+        void write(double num) {
             LCD.WriteRC(num, row, col);
             char text[400];
             itoa(num, text, 10);
@@ -243,11 +259,11 @@ int lever;
 int main(void)
 {
     preRun("PID Testing");
-    armServo.SetDegree(35);
-    Sleep(10000);
-    driveForward(36, 10, 0.2);
+    //armServo.SetDegree(35);
+    Sleep(3000);
+    driveForward(36, 10, 10);
 
-
+    stopRun();
 }
 
 
@@ -479,26 +495,27 @@ bool driveForward(float dist, float speed, float timeout) {
     int rightPwr = getRightMotorPwr(speed);
 
     float startTime = TimeNow();
-    resetPID();
     setMotorsPercent(leftPwr * leftReverse, rightPwr * rightReverse);
+    resetPID();
+    Sleep(250);
 
     while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
             && isNotTimeout(startTime, timeout) && prgActive()) {
+                float a, b;
                 if(PID_ENABLED) {
                     //telemetry.clear();
-                    leftPwr += PIDAdjustmentLeft(speed);
-                    rightPwr += PIDAdjustmentRight(speed);
+                    a = PIDAdjustmentLeft(speed);
+                    b = PIDAdjustmentRight(speed);
+                    leftPwr += a;
+                    rightPwr += b;
                     setMotorsPercent(leftPwr * leftReverse, rightPwr * rightReverse);
                 }
-                Sleep(100);
-                if(leftPwr <= 50 || rightPwr <= 50) {
-                    stopMotors();
-                    telemetry.writeLine(float(PIDAdjustmentLeft(speed)));
-                    telemetry.writeLine(float(PIDAdjustmentRight(speed)));
-                    telemetry.writeLine(leftPwr);
-                    telemetry.writeLine(rightPwr);
-                    while(true);
-                }
+                Sleep(250);
+                telemetry.clear();
+                //telemetry.writeLine(leftPwr);
+                //telemetry.writeLine(rightPwr);
+                //telemetry.writeLine(a);
+                //telemetry.writeLine(b);
             }
 
     stopMotors();
@@ -661,9 +678,9 @@ void armServoUp() {
 
 // ----------------- PID Functions -------------------------------
 
-#define P_CONST 0.75;
-#define I_CONST 0.08;
-#define D_CONST 0.25;
+#define P_CONST 1.0;
+#define I_CONST 0.00;
+#define D_CONST 0.0;
 
 int lastLeftCounts;
 int lastRightCounts;
@@ -672,11 +689,11 @@ double lastError;
 double errorSum;
 
 void resetPID() {
-    leftEncoder.ResetCounts();
-    rightEncoder.ResetCounts();
+    //leftEncoder.ResetCounts();
+    //rightEncoder.ResetCounts();
     updateParams(0);
     errorSum = 0;
-    Sleep(100);
+    Sleep(250);
 }
 
 double PIDAdjustmentLeft(float setVelo) {
@@ -684,8 +701,9 @@ double PIDAdjustmentLeft(float setVelo) {
     double timeDiff = TimeNow() - lastTime;
     double measuredVelo = DISTANCE_PER_COUNT * (double(countDiff) / timeDiff);
 
-    double error = double(abs(setVelo)) - measuredVelo;
+    double error = setVelo - measuredVelo;
     errorSum += error;
+    if(measuredVelo == 0) {error = 10;}
 
     double pTerm = error * P_CONST;
     double iTerm = errorSum * I_CONST;
@@ -700,14 +718,20 @@ double PIDAdjustmentRight(float setVelo) {
     double timeDiff = TimeNow() - lastTime;
     double measuredVelo = DISTANCE_PER_COUNT * (double(countDiff) / timeDiff);
 
-    double error = double(abs(setVelo)) - measuredVelo;
+    double error = setVelo - measuredVelo;
+    telemetry.writeLine(setVelo - measuredVelo);
     errorSum += error;
+    if(measuredVelo == 0) {error = 10.0;}
+    telemetry.writeLine(setVelo);
+    telemetry.writeLine(measuredVelo);
+    telemetry.writeLine(error);
 
     double pTerm = error * P_CONST;
     double iTerm = errorSum * I_CONST;
     double dTerm = (error - lastError) * D_CONST;
 
     updateParams(error);
+    telemetry.writeLine(pTerm + iTerm + dTerm);
     return pTerm + iTerm + dTerm;
 }
 
