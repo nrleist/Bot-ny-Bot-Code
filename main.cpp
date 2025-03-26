@@ -14,6 +14,7 @@
 using namespace std;
 
 const bool offCourseTesting = true;
+const bool PID_ENABLED = true;
 
 #define TEAM_ID_STRING "0150F3VKF"
 
@@ -33,8 +34,8 @@ FEHMotor spinner(FEHMotor::Motor2, 5.0);  // TODO: Check max volts for CRS
 
 // Declarations for servos
 FEHServo armServo(FEHServo::Servo6);
-#define ARM_SERVO_MIN 970
-#define ARM_SERVO_MAX 2100
+#define ARM_SERVO_MIN 2100
+#define ARM_SERVO_MAX 970
 
 // Declarations for sensors
 AnalogInputPin leftOpto(FEHIO::P1_0);
@@ -58,6 +59,7 @@ const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER;
 #define COUNTS_PER_INCH_RIGHT 17
 #define COUNTS_PER_INCH_LEFT 17
 #define DRIVETRAIN_WIDTH 8.5
+const double DISTANCE_PER_COUNT = WHEEL_CIRCUMFERENCE / COUNTS_PER_REV;
 
 // Battery Max Voltage
 #define MAX_BATT_VOLTS 11.5
@@ -104,6 +106,11 @@ void cdsTest();
 
 void armServoSetup();
 
+void resetPID();
+double PIDAdjustmentLeft(float setVelo);
+double PIDAdjustmentRight(float setVelo);
+void updateParams(double lastErrorSet);
+
 // Class definitions here
 class Telemetry {
     private:
@@ -114,7 +121,7 @@ class Telemetry {
 
     public:
         void clear() {
-            for(int i = 4; i <= 13; i++) {
+            for(int i = startRow; i <= 13; i++) {
                 LCD.WriteRC("                          ", i, 0);
             }
             row = startRow;
@@ -236,6 +243,9 @@ int lever;
 int main(void)
 {
     preRun("PID Testing");
+    armServo.SetDegree(35);
+    Sleep(10000);
+    driveForward(36, 10, 0.2);
 
 
 }
@@ -288,6 +298,10 @@ void stopRun() {
     LCD.WriteRC(" V", 3, 12);
     Buzzer.Buzz(500);
     while(true);
+}
+
+bool prgActive() {
+    return true;
 }
 
 // ---------------- Deprecitated Drive Functions ----------------
@@ -447,7 +461,12 @@ bool isNotTimeout(float startTime, float duration) {
 }
 
 float powerAdjust(float desiredPwr) {
-    return (MAX_BATT_VOLTS / Battery.Voltage()) * desiredPwr;
+    if(!PID_ENABLED){
+        return (MAX_BATT_VOLTS / Battery.Voltage()) * desiredPwr;
+    } else {
+        return desiredPwr;
+    }
+    
 }
 
 bool driveForward(float dist, float speed, float timeout) {
@@ -456,14 +475,31 @@ bool driveForward(float dist, float speed, float timeout) {
     int leftTargetCounts = getEncoderCountsLeft(dist);
     int rightTargetCounts = getEncoderCountsRight(dist);
 
-    int leftPwr = getLeftMotorPwr(speed) * leftReverse;
-    int rightPwr = getRightMotorPwr(speed) * rightReverse;
+    int leftPwr = getLeftMotorPwr(speed);
+    int rightPwr = getRightMotorPwr(speed);
 
     float startTime = TimeNow();
-    setMotorsPercent(leftPwr, rightPwr);
+    resetPID();
+    setMotorsPercent(leftPwr * leftReverse, rightPwr * rightReverse);
 
     while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
-            && isNotTimeout(startTime, timeout) && prgActive());
+            && isNotTimeout(startTime, timeout) && prgActive()) {
+                if(PID_ENABLED) {
+                    //telemetry.clear();
+                    leftPwr += PIDAdjustmentLeft(speed);
+                    rightPwr += PIDAdjustmentRight(speed);
+                    setMotorsPercent(leftPwr * leftReverse, rightPwr * rightReverse);
+                }
+                Sleep(100);
+                if(leftPwr <= 50 || rightPwr <= 50) {
+                    stopMotors();
+                    telemetry.writeLine(float(PIDAdjustmentLeft(speed)));
+                    telemetry.writeLine(float(PIDAdjustmentRight(speed)));
+                    telemetry.writeLine(leftPwr);
+                    telemetry.writeLine(rightPwr);
+                    while(true);
+                }
+            }
 
     stopMotors();
     return isNotTimeout(startTime, timeout + .001);
@@ -475,14 +511,22 @@ bool driveBackward(float dist, float speed, float timeout) {
     int leftTargetCounts = getEncoderCountsLeft(dist);
     int rightTargetCounts = getEncoderCountsRight(dist);
 
-    int leftPwr = -getLeftMotorPwr(speed) * leftReverse;
-    int rightPwr = -getRightMotorPwr(speed) * rightReverse;
+    int leftPwr = getLeftMotorPwr(speed);
+    int rightPwr = getRightMotorPwr(speed);
 
     float startTime = TimeNow();
-    setMotorsPercent(leftPwr, rightPwr);
+    resetPID();
+    setMotorsPercent(-leftPwr * leftReverse, -rightPwr * rightReverse);
 
     while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
-            && isNotTimeout(startTime, timeout) && prgActive());
+            && isNotTimeout(startTime, timeout) && prgActive()) {
+                if(PID_ENABLED) {
+                    leftPwr += PIDAdjustmentLeft(speed);
+                    rightPwr += PIDAdjustmentRight(speed);
+                    setMotorsPercent(-leftPwr * leftReverse, -rightPwr * rightReverse);
+                }
+                Sleep(50);
+            }
 
     stopMotors();
     return isNotTimeout(startTime, timeout + .001);
@@ -500,14 +544,22 @@ bool turnLeft(float deg, float speed, float timeout) {
     int leftTargetCounts = getEncoderCountsLeft(turnDist);
     int rightTargetCounts = getEncoderCountsRight(turnDist);
 
-    int leftPwr = -getLeftMotorPwr(linearSpeed) * leftReverse;
+    int leftPwr = getLeftMotorPwr(linearSpeed) * leftReverse;
     int rightPwr = getRightMotorPwr(linearSpeed) * rightReverse;
 
     float startTime = TimeNow();
-    setMotorsPercent(leftPwr, rightPwr);
+    resetPID();
+    setMotorsPercent(-leftPwr * leftReverse, rightPwr * rightReverse);
 
     while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
-            && isNotTimeout(startTime, timeout) && prgActive());
+            && isNotTimeout(startTime, timeout) && prgActive()) {
+                if(PID_ENABLED) {
+                    leftPwr += PIDAdjustmentLeft(speed);
+                    rightPwr += PIDAdjustmentRight(speed);
+                    setMotorsPercent(-leftPwr * leftReverse, rightPwr * rightReverse);
+                }
+                Sleep(50);
+            }       
 
     stopMotors();
     return isNotTimeout(startTime, timeout + .001);
@@ -521,14 +573,22 @@ bool turnRight(float deg, float speed, float timeout) {
     int leftTargetCounts = getEncoderCountsLeft(turnDist);
     int rightTargetCounts = getEncoderCountsRight(turnDist);
 
-    int leftPwr = getLeftMotorPwr(linearSpeed) * leftReverse;
-    int rightPwr = -getRightMotorPwr(linearSpeed) * rightReverse;
+    int leftPwr = getLeftMotorPwr(linearSpeed);
+    int rightPwr = getRightMotorPwr(linearSpeed);
 
     float startTime = TimeNow();
-    setMotorsPercent(leftPwr, rightPwr);
+    resetPID();
+    setMotorsPercent(leftPwr * leftReverse, -rightPwr * rightReverse);
 
     while(checkLeftCounts(leftTargetCounts) && checkRightCounts(rightTargetCounts)
-            && isNotTimeout(startTime, timeout) && prgActive());
+            && isNotTimeout(startTime, timeout) && prgActive()) {
+                if(PID_ENABLED) {
+                    leftPwr += PIDAdjustmentLeft(speed);
+                    rightPwr += PIDAdjustmentRight(speed);
+                    setMotorsPercent(leftPwr * leftReverse, -rightPwr * rightReverse);
+                }
+                Sleep(50);
+            }
 
     stopMotors();
     return isNotTimeout(startTime, timeout + .001);
@@ -591,10 +651,69 @@ void cdsTest() {
 
 void armServoSetup() {
     armServo.SetMin(ARM_SERVO_MIN);
-    armServo.SetMax(ARM_SERVO_MIN);
+    armServo.SetMax(ARM_SERVO_MAX);
     armServo.SetDegree(180);
 }
 
 void armServoUp() {
     armServo.SetDegree(180);
+}
+
+// ----------------- PID Functions -------------------------------
+
+#define P_CONST 0.75;
+#define I_CONST 0.08;
+#define D_CONST 0.25;
+
+int lastLeftCounts;
+int lastRightCounts;
+double lastTime;
+double lastError;
+double errorSum;
+
+void resetPID() {
+    leftEncoder.ResetCounts();
+    rightEncoder.ResetCounts();
+    updateParams(0);
+    errorSum = 0;
+    Sleep(100);
+}
+
+double PIDAdjustmentLeft(float setVelo) {
+    int countDiff = lastLeftCounts - leftEncoder.Counts();
+    double timeDiff = TimeNow() - lastTime;
+    double measuredVelo = DISTANCE_PER_COUNT * (double(countDiff) / timeDiff);
+
+    double error = double(abs(setVelo)) - measuredVelo;
+    errorSum += error;
+
+    double pTerm = error * P_CONST;
+    double iTerm = errorSum * I_CONST;
+    double dTerm = (error - lastError) * D_CONST;
+
+    updateParams(error);
+    return pTerm + iTerm + dTerm;
+}
+
+double PIDAdjustmentRight(float setVelo) {
+    int countDiff = lastRightCounts - rightEncoder.Counts();
+    double timeDiff = TimeNow() - lastTime;
+    double measuredVelo = DISTANCE_PER_COUNT * (double(countDiff) / timeDiff);
+
+    double error = double(abs(setVelo)) - measuredVelo;
+    errorSum += error;
+
+    double pTerm = error * P_CONST;
+    double iTerm = errorSum * I_CONST;
+    double dTerm = (error - lastError) * D_CONST;
+
+    updateParams(error);
+    return pTerm + iTerm + dTerm;
+}
+
+void updateParams(double lastErrorSet) {
+    lastLeftCounts = leftEncoder.Counts();
+    lastRightCounts = rightEncoder.Counts();
+    lastError = lastErrorSet;
+    lastTime = TimeNow();
 }
