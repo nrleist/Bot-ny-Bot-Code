@@ -13,6 +13,8 @@
 #include <iostream>
 using namespace std;
 
+const bool offCourseTesting = true;
+
 #define TEAM_ID_STRING "0150F3VKF"
 
 enum Levers {
@@ -31,6 +33,8 @@ FEHMotor spinner(FEHMotor::Motor2, 5.0);  // TODO: Check max volts for CRS
 
 // Declarations for servos
 FEHServo armServo(FEHServo::Servo6);
+#define ARM_SERVO_MIN 970
+#define ARM_SERVO_MAX 2100
 
 // Declarations for sensors
 AnalogInputPin leftOpto(FEHIO::P1_0);
@@ -97,6 +101,8 @@ void waitForStartLight(char prgName[]);
 int getLightColor();
 void lightSensorReadout();
 void cdsTest();
+
+void armServoSetup();
 
 // Class definitions here
 class Telemetry {
@@ -229,76 +235,28 @@ int lever;
 
 int main(void)
 {
-    preRun("Milestone 4");
-    telemetry.write("Lever is ");
-    telemetry.writeLine(lever);
+    preRun("PID Testing");
 
-    armServo.SetDegree(60);
-    driveForward(4, 15, 1.1);
-    driveBackward(2, 7, 3);
-    driveBackward(14.7, 8, 4);
-    turnLeft(59, 60, 3);
-    driveBackward(5, 7, 2);
-    driveBackward(3, 4, 4);
 
-    Sleep(500);
-    armServo.SetDegree(95);
-    Sleep(250);
-
-    driveForward(10, 10, 3);
-    turnRight(30, 60, 3);
-    driveForward(6, 10, 2);
-    turnLeft(30, 60, 3);
-    driveForward(12, 10, 4);
-
-    driveBackward(1.5, 10, 2);
-    turnRight(100, 60, 4);
-
-    rampAdjust = .35;
-    driveBackward(36, 15, 6);
-    rampAdjust = .15;
-
-    turnLeft(50, 60, 3);
-    driveBackward(10, 10, 3);
-    turnRight(50, 60 , 3);
-    driveBackward(12, 10, 3);
-
-    armServo.SetDegree(30);
-    driveForward(18, 10, 3);
-    turnLeft(55, 60, 2);
-    driveBackward(5, 10, 2);
-
-    /*
-    switch(lever) {
-        case LEFT:
-            return;
-        case MIDDLE:
-            return;
-        case RIGHT:
-            return;
-
-        default:
-
-    }*/
-
-    stopRun();
 }
 
 
+// Function definitions below
 
-// Function definitions here
+// ---------------- Utill. Functions ----------------------------
 
 int preRun(char prgName[]) {
-    armServo.SetMin(970);
-    armServo.SetMax(2100);
-    armServo.SetDegree(180);
-    connectRCS();
-    waitForStartLight(prgName);
-    //waitForTouch(prgName);
-    lever = RCS.GetLever();
-    //lever = 0;
-    return RCS.GetLever();
-    //return 0;
+    armServoSetup();
+    if(offCourseTesting) {
+        waitForTouch(prgName);
+        lever = 0;
+        return 0;
+    } else {
+        connectRCS();
+        waitForStartLight(prgName);
+        lever = RCS.GetLever();
+        return RCS.GetLever();
+    }
 }
 
 void waitForTouch(char prgName[]) {
@@ -331,6 +289,8 @@ void stopRun() {
     Buzzer.Buzz(500);
     while(true);
 }
+
+// ---------------- Deprecitated Drive Functions ----------------
 
 void moveForward(int percent, int inches) { // DEPRECIATED - Do not use unless for testing
     telemetry.writeLine("WARNING: moveForward() method should not be used.");
@@ -401,12 +361,11 @@ void turn(int percent, int direction, int degrees) { // DEPRECIATED - Do not use
     leftMotor.Stop();
 }
 
+// ---------------- Drive functions -----------------------------
 void stopMotors() {
     leftMotor.Stop();
     rightMotor.Stop();
 }
-
-// Encoder Test code
 
 void setMotorsPercent(float p) {
     leftMotor.SetPercent(powerAdjust(p));
@@ -423,7 +382,7 @@ void resetEncoders() {
     rightEncoder.ResetCounts();
 }
 
-void encoderTest() {
+void encoderTest() { // Encoder Test function
 
     FEHFile * fptr = SD.FOpen("et.txt", "w");
 
@@ -451,8 +410,6 @@ void encoderTest() {
 
     SD.FClose(fptr);
 }
-
-// Drive code
 
 float rightMotorCorrection(float pwr) {
     return pwr * rampAdjust; // TODO: Dervive better correction equation
@@ -577,18 +534,14 @@ bool turnRight(float deg, float speed, float timeout) {
     return isNotTimeout(startTime, timeout + .001);
 }
 
-bool prgActive() {
-    return true;
-}
-
-// Write RCS Code
+// ------------------ RCS Functions --------------------------------
 
 void connectRCS() {
     RCS.InitializeTouchMenu(TEAM_ID_STRING);
     Sleep(250);
 }
 
-// Write CdS Cell code 
+// ----------------- CdS Cell Functions
 
 void waitForStartLight(char prgName[]) {
     LCD.Clear(BLACK);
@@ -632,4 +585,16 @@ void cdsTest() {
         lightSensorReadout();
         Sleep(100);
     }
+}
+
+// ----------------- Arm Servo Functions -----------------------------
+
+void armServoSetup() {
+    armServo.SetMin(ARM_SERVO_MIN);
+    armServo.SetMax(ARM_SERVO_MIN);
+    armServo.SetDegree(180);
+}
+
+void armServoUp() {
+    armServo.SetDegree(180);
 }
