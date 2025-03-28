@@ -255,29 +255,34 @@ int main(void)
     driveBackward(1.5, 10, 2);
     turnRight(100, 60, 4);
 
-    rampAdjust = .17;
-    driveBackward(33, 18, 6);
+    rampAdjust = .10;
+    driveBackward(33, 20, 6);
     rampAdjust = .17;
 
     turnLeft(35, 60, 3);
-    driveBackward(4.5, 10, 2);
-    turnLeft(100, 60, 2);
-    driveForward(4.5, 10, 3);
+    driveBackward(5, 10, 2);
+    turnLeft(50, 60, 2);
+    driveBackward(1.5, 10, 2);
+    turnLeft(50, 60, 2);
+    driveForward(7, 10, 3);
     driveBackward(7.2, 10, 3);
     turnRight(100, 60 , 3);
-    driveBackward(17, 10, 3);
+    driveBackward(25, 10, 3);
 
     armServo.SetDegree(30);
-    driveForward(18, 10, 3);
-    turnLeft(55, 60, 2);
+    driveForward(19, 10, 3);
+    turnLeft(43, 60, 2);
     armServo.SetDegree(105);
-    driveBackward(10, 10, 2);
+    driveBackward(16, 10, 2);
     armServo.SetDegree(30);
-    driveForward(1, 10, 2);
-    armServo.SetDegree(20);
+    Sleep(1000);
+    driveForward(4, 10, 2);
+    armServo.SetDegree(0);
     Sleep(5.0);
-    driveBackward(1, 10, 2);
+    turnLeft(3, 60, 2);
+    driveBackward(5.2, 10, 2);
     armServo.SetDegree(100);
+    Sleep(1000);
 
     int z;
     switch(lever) {
