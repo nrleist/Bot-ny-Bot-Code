@@ -49,33 +49,6 @@ class FEHRCS {
    */
   int Time();
 
-  // /**
-  //  * @brief Get current X position of QR code on course
-  //  *
-  //  * Get current X position of QR code on course
-  //  *
-  //  * @return float X coordinate (inches)
-  //  */
-  // float X();
-
-  // /**
-  //  * @brief Get current Y position of QR code on course
-  //  *
-  //  * Get current Y position of QR code on course
-  //  *
-  //  * @return float Y coordinate (inches)
-  //  */
-  // float Y();
-
-  // /**
-  //  * @brief Get current heading angle of QR code
-  //  *
-  //  * Get current heading angle of QR code
-  //  *
-  //  * @return float Heading angle (degrees)
-  //  */
-  // float Heading();
-
   // Objective functions:
   /**
    * @brief Get correct lever for task
@@ -85,6 +58,20 @@ class FEHRCS {
    * @return int 0 (left lever), 1 (middle lever), 2 (right lever)
    */
   int GetLever();
+
+  /**
+   * @brief Tells you if a lever has been flipped down but not up
+   *
+   * @return int 1 if lever has been flipped down, but not up. 0 otherwise
+   */
+  bool isLeverFlipped();
+
+  /**
+   * @brief Tells you if the window is fully open or closed
+   *
+   * @return int 1 if window is fully open, 0 if closed
+   */
+  bool isWindowOpen();
 
   // returns the number of the current course { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
   // 10, 11 }
@@ -107,7 +94,6 @@ class FEHRCS {
   void Initialize(char region, const char* team_key);
 
   FEHXBee _xbee;
-  int _region;
 };
 
 /**
