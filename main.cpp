@@ -98,6 +98,9 @@ int getLightColor();
 void lightSensorReadout();
 void cdsTest();
 
+void spinClockwise();
+void spinCounterClockwise();
+
 // Class definitions here
 class Telemetry {
     private:
@@ -229,7 +232,7 @@ int lever;
 
 int main(void)
 {
-    preRun("Milestone 5");
+    preRun("Brutus' Garden");
     telemetry.write("Lever is ");
     telemetry.writeLine(lever);
 
@@ -239,25 +242,57 @@ int main(void)
     turnLeft(60, 60, 2);
     driveForward(10, 5, 4);
 
-    spinner.SetPercent(70);
-    Sleep(1750);
-    spinner.SetPercent(30);
-    Sleep(500);
-    spinner.Stop();
+    spinClockwise();
+    Sleep(1000);
+    spinCounterClockwise();
 
+    driveBackward(1, 20, 3);
+    turnRight(99, 60, 3);
+    driveForward(17.1, 10, 4);
+
+    turnRight(117, 60, 3);
+    armServo.SetDegree(60);
+    driveBackward(10, 7, 5);
+    armServo.SetDegree(100);
+    Sleep(250);
+
+    driveForward(10, 10, 3);
+    turnRight(30, 60, 3);
+    driveForward(6, 10, 2);
+    turnLeft(30, 60, 3);
+    driveForward(12, 10, 4);
+
+    driveBackward(1.4, 10, 2);
+    turnRight(102, 60, 4);
+
+    rampAdjust = .17;
+    driveBackward(30, 20, 6);
+    rampAdjust = .17;
+
+    turnLeft(35, 60, 3);
+    driveBackward(3, 10, 2);
+    turnLeft(50, 60, 2);
+    driveBackward(1, 10, 2);
+    turnLeft(50, 60, 2);
+    driveForward(7, 10, 3);
+    driveBackward(6, 10, 3);
+    turnRight(107, 60 , 3);
+    driveBackward(25, 10, 3);
+
+    armServo.SetDegree(30);
+    driveForward(14, 10, 3);
+    turnLeft(43, 60, 2);
+    armServo.SetDegree(105);
+    driveBackward(12, 10, 2);
+    armServo.SetDegree(30);
     Sleep(2000);
-
-    spinner.SetPercent(-70);
-    Sleep(1800);
-    spinner.SetPercent(-30);
-    Sleep(500);
-    spinner.Stop();
-
-    driveBackward(10, 10, 3);
-    turnRight(60, 60, 2);
-    driveBackward(4, 15, 3);
-    driveForward(2, 7, 3);
-
+    driveForward(4, 10, 2);
+    armServo.SetDegree(0);
+    Sleep(5.0);
+    turnLeft(3, 60, 2);
+    driveBackward(5.2, 10, 2);
+    armServo.SetDegree(100);
+    Sleep(1000);
 
     stopRun();
 }
@@ -271,8 +306,8 @@ int preRun(char prgName[]) {
     armServo.SetMax(2100);
     armServo.SetDegree(180);
     connectRCS();
+    waitForTouch(prgName);
     waitForStartLight(prgName);
-    //waitForTouch(prgName);
     lever = RCS.GetLever();
     //lever = 0;
     return RCS.GetLever();
@@ -610,4 +645,22 @@ void cdsTest() {
         lightSensorReadout();
         Sleep(100);
     }
+}
+
+// Spinner Code
+
+void spinClockwise() {
+    spinner.SetPercent(70 * spinReverse);
+    Sleep(2000);
+    spinner.SetPercent(30 * spinReverse);
+    Sleep(500);
+    spinner.Stop();
+}
+
+void spinCounterClockwise() {
+    spinner.SetPercent(-70 * spinReverse);
+    Sleep(1800);
+    spinner.SetPercent(-30 * spinReverse);
+    Sleep(500);
+    spinner.Stop();
 }
