@@ -39,9 +39,9 @@ AnalogInputPin rightOpto(FEHIO::P1_0);
 AnalogInputPin lightSenor(FEHIO::P0_1);
 
 // Values to reverse motors
-const int leftReverse = 1;
+const int leftReverse = -1;
 const int rightReverse = -1;
-const int spinReverse = 1;
+const int spinReverse = -1;
 
 // TODO: Get test counts.
 
@@ -63,7 +63,7 @@ const float WHEEL_CIRCUMFERENCE = PI * WHEEL_DIAMETER;
 #define BLUE_THRESHOLD 1.131
 #define RED_THRESHOLD 0.445
 
-int rampAdjust = .15;
+int rampAdjust = .17;
 
 // Function declarations here
 void waitForTouch(char prgName[]);
@@ -229,20 +229,34 @@ int lever;
 
 int main(void)
 {
-    rampAdjust = .17;
     preRun("Milestone 5");
     telemetry.write("Lever is ");
     telemetry.writeLine(lever);
 
-    spinner.SetPercent(50);
-    Sleep(3000);
-    spinner.SetPercent(0);
+    driveBackward(4, 15, 3);
+    driveForward(2, 7, 3);
 
-    Sleep(1000);
+    turnLeft(60, 60, 2);
+    driveForward(10, 5, 4);
 
-    spinner.SetPercent(-50);
-    Sleep(3000);
-    spinner.SetPercent(0);
+    spinner.SetPercent(70);
+    Sleep(1750);
+    spinner.SetPercent(30);
+    Sleep(500);
+    spinner.Stop();
+
+    Sleep(2000);
+
+    spinner.SetPercent(-70);
+    Sleep(1800);
+    spinner.SetPercent(-30);
+    Sleep(500);
+    spinner.Stop();
+
+    driveBackward(10, 10, 3);
+    turnRight(60, 60, 2);
+    driveBackward(4, 15, 3);
+    driveForward(2, 7, 3);
 
 
     stopRun();
