@@ -370,6 +370,7 @@ int preRun(char prgName[]) {
         return 0;
     } else {
         connectRCS();
+        waitForTouch(prgName);
         waitForStartLight(prgName);
         lever = RCS.GetLever();
         return RCS.GetLever();
@@ -833,6 +834,7 @@ void updateParams(double lastErrorSet) {
     lastRightCounts = rightEncoder.Counts();
     lastError = lastErrorSet;
     lastTime = TimeNow();
+}
 
 // Spinner Code
 
