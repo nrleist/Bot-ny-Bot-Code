@@ -15,13 +15,15 @@ void RCSDataProcess(unsigned char* data, unsigned char length);
 
 bool _enabled;
 int _region;
-float _RCS_x;
-float _RCS_y;
-float _RCS_heading;
-long _RCS_objective;
+
+unsigned char _RCS_objective;
 unsigned char _RCS_time;
 bool _RCS_stop;
 bool _RCS_foundpacket;
+
+// Task Statuses
+unsigned char _RCS_leverFlipped;
+unsigned char _RCS_dualSliderStatus;
 
 FEHRCS::FEHRCS() {
   _xbee.SetPacketCallBack(&RCSDataProcess);
@@ -29,9 +31,8 @@ FEHRCS::FEHRCS() {
   //_enabled = true;
   _region = -1;
 
-  _RCS_x = 0.0f;
-  _RCS_y = 0.0f;
-  _RCS_heading = 0.0f;
+  _RCS_leverFlipped = 0x0;
+  _RCS_dualSliderStatus = 0x0;
   _RCS_objective = 0x0;
   _RCS_time = 0;
   _RCS_stop = false;
@@ -454,6 +455,20 @@ int FEHRCS::GetLever() {
   return (int)_RCS_objective;
 }
 
+int FEHRCS::isLeverFlipped() {
+  if ((int)_RCS_leverFlipped == 1) {
+    return 1;
+  }
+  return 0;
+}
+
+int FEHRCS::isWindowOpen() {
+  if (_RCS_dualSliderStatus == 2) {
+    return 1;
+  }
+  return 0;
+}
+
 // returns the match time in seconds
 int FEHRCS::Time() {
   return (int)_RCS_time;
@@ -510,40 +525,15 @@ int FEHRCS::WaitForPacketDebug(int* packetsFound,
   return elapsedtime;
 }
 
-// float FEHRCS::X()
-// {
-// 	return _RCS_x;
-// }
-
-// float FEHRCS::Y()
-// {
-// 	return _RCS_y;
-// }
-
-// float FEHRCS::Heading()
-// {
-// 	return _RCS_heading;
-// }
-
 void RCSDataProcess(unsigned char* data, unsigned char length) {
   if (_enabled) {
-    /*
-        New packet structure:
-        [0] : RCS Start Byte
-        [1 - 4] : RCS Objective Data
-        [5] : RCS Stop
-    */
+    _RCS_objective = data[1];
 
-    // _RCS_x = (float)( (int)( ( ( (unsigned int)data[ 1 ] ) << 8 ) + (unsigned
-    // int)data[ 2 ] ) ) / 10.0f - 1600.0f; _RCS_y = (float)( (int)( ( (
-    // (unsigned int)data[ 3 ] ) << 8 ) + (unsigned int)data[ 4 ] ) ) / 10.0f -
-    // 1600.0f; _RCS_heading = (float)( (int)( ( ( (unsigned int)data[ 5 ] ) <<
-    // 8 ) + (unsigned int)data[ 6 ] ) ) / 10.0f - 1600.0f;
-    _RCS_objective =
-        (((unsigned int)(data[1]) << 24) | ((unsigned int)(data[2]) << 16) |
-         ((unsigned int)(data[3]) << 8) | (data[4]));
-    _RCS_time = data[5];
-    _RCS_stop = (data[6] == STOPDATA);
+    _RCS_leverFlipped = data[2];
+    _RCS_dualSliderStatus = data[3];
+
+    _RCS_time = data[4];
+    _RCS_stop = (data[5] == STOPDATA);
     _RCS_foundpacket = true;
 
     if (_RCS_stop) {

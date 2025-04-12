@@ -44,9 +44,9 @@ AnalogInputPin rightOpto(FEHIO::P1_0);
 AnalogInputPin lightSenor(FEHIO::P0_1);
 
 // Values to reverse motors
-const int leftReverse = 1;
+const int leftReverse = -1;
 const int rightReverse = -1;
-const int spinReverse = 1;
+const int spinReverse = -1;
 
 // TODO: Get test counts.
 
@@ -69,7 +69,7 @@ const double DISTANCE_PER_COUNT = WHEEL_CIRCUMFERENCE / COUNTS_PER_REV;
 #define BLUE_THRESHOLD 1.131
 #define RED_THRESHOLD 0.445
 
-int rampAdjust = .15;
+int rampAdjust = .17;
 
 // Function declarations here
 void waitForTouch(char prgName[]);
@@ -104,12 +104,17 @@ int getLightColor();
 void lightSensorReadout();
 void cdsTest();
 
+
 void armServoSetup();
 
 void resetPID();
 double PIDAdjustmentLeft(float setVelo);
 double PIDAdjustmentRight(float setVelo);
 void updateParams(double lastErrorSet);
+
+void spinClockwise();
+void spinCounterClockwise();
+
 
 // Class definitions here
 class Telemetry {
@@ -258,11 +263,97 @@ int lever;
 
 int main(void)
 {
-    preRun("PID Testing");
-    //armServo.SetDegree(35);
-    Sleep(3000);
-    driveForward(36, 10, 10);
 
+    preRun("Brutus' Garden");
+    telemetry.write("Lever is ");
+    telemetry.writeLine(lever);
+
+    driveBackward(4, 15, 3);
+    driveForward(2, 7, 3);
+
+    turnLeft(60, 60, 2);
+    driveForward(10, 5, 4);
+
+    spinClockwise();
+    Sleep(1000);
+    spinCounterClockwise();
+
+    driveBackward(1, 20, 3);
+    turnRight(99, 60, 3);
+    driveForward(17, 10, 4);
+
+    turnRight(117, 60, 3);
+    armServo.SetDegree(60);
+    driveBackward(10, 7, 5);
+    armServo.SetDegree(100);
+    Sleep(250);
+
+    driveForward(10, 10, 3);
+    turnRight(30, 60, 3);
+    driveForward(6, 10, 2);
+    turnLeft(30, 60, 3);
+    spinner.SetPercent(30);
+    Sleep(.18);
+    spinner.Stop();
+    driveForward(12, 10, 4);
+
+    driveBackward(1.4, 10, 2);
+    turnRight(105, 60, 4);
+
+    rampAdjust = .17;
+    driveBackward(30, 20, 6);
+    rampAdjust = .17;
+
+    turnLeft(35, 60, 3);
+    driveBackward(3, 10, 2);
+    turnLeft(50, 60, 2);
+    driveBackward(1, 10, 2);
+    turnLeft(50, 60, 2);
+    driveForward(7, 10, 3);
+    driveBackward(6, 10, 3);
+    turnRight(107, 60 , 3);
+    driveBackward(25, 10, 3);
+
+    armServo.SetDegree(30);
+    driveForward(14, 10, 3);
+    turnLeft(45, 60, 2);
+    armServo.SetDegree(105);
+    driveBackward(12.7, 10, 2);
+    armServo.SetDegree(30);
+    Sleep(2000);
+    driveForward(4, 10, 2);
+    armServo.SetDegree(0);
+    Sleep(4.0);
+    turnLeft(3, 60, 2);
+    driveBackward(3.8, 10, 2);
+    armServo.SetDegree(100);
+    Sleep(1000);
+
+    armServo.SetDegree(50);
+    driveForward(15.8, 10, 2);
+    armServo.SetDegree(180);
+    turnLeft(50, 60, 2);
+    driveBackward(30, 10, 3);
+    Sleep(250);
+    //driveForward(5.5, 10, 2);
+    /* Window Code
+    turnRight(100, 60, 5);
+    driveForward(8, 10, 2);
+    turnRight(100, 60, 2);
+
+    turnRight(100, 80, 5);
+    Sleep(100);
+    turnLeft(100, 80, 5);
+
+    turnRight(10, 40, 5);
+    driveBackward(5, 10, 2);*/
+
+    driveForward(35, 10, 3.0);
+    driveBackward(1.4, 10, 2);
+    turnLeft(105, 70, 5.0);
+    driveForward(60, 15, 10.0);
+
+    
     stopRun();
 }
 
@@ -283,6 +374,7 @@ int preRun(char prgName[]) {
         lever = RCS.GetLever();
         return RCS.GetLever();
     }
+
 }
 
 void waitForTouch(char prgName[]) {
@@ -664,6 +756,7 @@ void cdsTest() {
     }
 }
 
+
 // ----------------- Arm Servo Functions -----------------------------
 
 void armServoSetup() {
@@ -740,4 +833,21 @@ void updateParams(double lastErrorSet) {
     lastRightCounts = rightEncoder.Counts();
     lastError = lastErrorSet;
     lastTime = TimeNow();
+
+// Spinner Code
+
+void spinClockwise() {
+    spinner.SetPercent(70 * spinReverse);
+    Sleep(2000);
+    spinner.SetPercent(30 * spinReverse);
+    Sleep(500);
+    spinner.Stop();
+}
+
+void spinCounterClockwise() {
+    spinner.SetPercent(-70 * spinReverse);
+    Sleep(1800);
+    spinner.SetPercent(-30 * spinReverse);
+    Sleep(500);
+    spinner.Stop();
 }
