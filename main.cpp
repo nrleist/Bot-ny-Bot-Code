@@ -248,7 +248,7 @@ int main(void)
 
     driveBackward(1, 20, 3);
     turnRight(99, 60, 3);
-    driveForward(17.1, 10, 4);
+    driveForward(17, 10, 4);
 
     turnRight(117, 60, 3);
     armServo.SetDegree(60);
@@ -260,10 +260,13 @@ int main(void)
     turnRight(30, 60, 3);
     driveForward(6, 10, 2);
     turnLeft(30, 60, 3);
+    spinner.SetPercent(30);
+    Sleep(.18);
+    spinner.Stop();
     driveForward(12, 10, 4);
 
     driveBackward(1.4, 10, 2);
-    turnRight(102, 60, 4);
+    turnRight(105, 60, 4);
 
     rampAdjust = .17;
     driveBackward(30, 20, 6);
@@ -281,19 +284,44 @@ int main(void)
 
     armServo.SetDegree(30);
     driveForward(14, 10, 3);
-    turnLeft(43, 60, 2);
+    turnLeft(45, 60, 2);
     armServo.SetDegree(105);
-    driveBackward(12, 10, 2);
+    driveBackward(12.7, 10, 2);
     armServo.SetDegree(30);
     Sleep(2000);
     driveForward(4, 10, 2);
     armServo.SetDegree(0);
-    Sleep(5.0);
+    Sleep(4.0);
     turnLeft(3, 60, 2);
-    driveBackward(5.2, 10, 2);
+    driveBackward(3.8, 10, 2);
     armServo.SetDegree(100);
     Sleep(1000);
 
+    armServo.SetDegree(50);
+    driveForward(15.8, 10, 2);
+    armServo.SetDegree(180);
+    turnLeft(50, 60, 2);
+    driveBackward(30, 10, 3);
+    Sleep(250);
+    //driveForward(5.5, 10, 2);
+    /* Window Code
+    turnRight(100, 60, 5);
+    driveForward(8, 10, 2);
+    turnRight(100, 60, 2);
+
+    turnRight(100, 80, 5);
+    Sleep(100);
+    turnLeft(100, 80, 5);
+
+    turnRight(10, 40, 5);
+    driveBackward(5, 10, 2);*/
+
+    driveForward(35, 10, 3.0);
+    driveBackward(1.4, 10, 2);
+    turnLeft(105, 70, 5.0);
+    driveForward(60, 15, 10.0);
+
+    
     stopRun();
 }
 
@@ -306,6 +334,7 @@ int preRun(char prgName[]) {
     armServo.SetMax(2100);
     armServo.SetDegree(180);
     connectRCS();
+    Sleep(500);
     waitForTouch(prgName);
     waitForStartLight(prgName);
     lever = RCS.GetLever();

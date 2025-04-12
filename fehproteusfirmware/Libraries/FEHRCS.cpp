@@ -455,18 +455,18 @@ int FEHRCS::GetLever() {
   return (int)_RCS_objective;
 }
 
-bool FEHRCS::isLeverFlipped() {
+int FEHRCS::isLeverFlipped() {
   if ((int)_RCS_leverFlipped == 1) {
-    return true;
+    return 1;
   }
-  return false;
+  return 0;
 }
 
-bool FEHRCS::isWindowOpen() {
+int FEHRCS::isWindowOpen() {
   if (_RCS_dualSliderStatus == 2) {
-    return true;
+    return 1;
   }
-  return false;
+  return 0;
 }
 
 // returns the match time in seconds

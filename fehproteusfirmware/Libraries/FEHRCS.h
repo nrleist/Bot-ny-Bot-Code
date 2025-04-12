@@ -64,14 +64,14 @@ class FEHRCS {
    *
    * @return int 1 if lever has been flipped down, but not up. 0 otherwise
    */
-  bool isLeverFlipped();
+  int isLeverFlipped();
 
   /**
    * @brief Tells you if the window is fully open or closed
    *
    * @return int 1 if window is fully open, 0 if closed
    */
-  bool isWindowOpen();
+  int isWindowOpen();
 
   // returns the number of the current course { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
   // 10, 11 }
