@@ -13,7 +13,7 @@
 #include <iostream>
 using namespace std;
 
-const bool offCourseTesting = false;
+const bool offCourseTesting = true;
 const bool PID_ENABLED = false;
 
 #define TEAM_ID_STRING "0150F3VKF"
@@ -264,101 +264,16 @@ int lever;
 int main(void)
 {
 
-    preRun("Brutus' Garden");
-    telemetry.write("Lever is ");
-    telemetry.writeLine(lever);
+    preRun("Light Check");
+    while(true) {
+        telemetry.write("Light Value: ");
+        telemetry.writeLine(lightSenor.Value());
 
-    driveBackward(4, 15, 3);
-    driveForward(0.08, 5, 3);
+        telemetry.write("Start Light?: ");
+        telemetry.writeLine(lightSenor.Value() > LIGHT_ON_THRESHOLD);
 
-    turnLeft(51, 60, 3);
-    driveForward(10, 5, 4);
-
-    spinClockwise();
-    Sleep(1000);
-    spinCounterClockwise();
-
-    driveBackward(1, 20, 3);
-    turnRight(160, 60, 10);
-    driveBackward(16, 10, 2);
-    driveForward(19.0, 10, 4);
-
-    turnRight(118, 60, 3);
-    armServo.SetDegree(60);
-    Sleep(.75);
-    turnLeft(7, 60, 2);
-    rampAdjust = .15;
-    driveBackward(10, 5, 5);
-    rampAdjust = .19;
-    armServo.SetDegree(100);
-    Sleep(.75);
-    Sleep(250);
-
-    driveForward(10, 10, 3);
-    turnRight(30, 60, 3);
-    driveForward(6, 10, 2);
-    turnLeft(30, 60, 3);
-    spinner.SetPercent(30);
-    Sleep(.18);
-    spinner.Stop();
-    driveForward(12, 10, 4);
-
-    driveBackward(1.4, 10, 2);
-    turnRight(108, 60, 4);
-
-    rampAdjust = .7;
-    driveBackward(37, 18, 6);
-    rampAdjust = .19;
-
-    turnLeft(35, 60, 3);
-    driveBackward(3, 10, 2);
-    turnLeft(50, 60, 2);
-    driveBackward(1, 10, 2);
-    turnLeft(50, 60, 2);
-    driveForward(7, 10, 3);
-    driveBackward(6, 10, 3);
-    turnRight(107, 60 , 3);
-    driveBackward(25, 10, 3);
-
-    armServo.SetDegree(30);
-    driveForward(14, 10, 3);
-    turnLeft(45, 60, 2);
-    armServo.SetDegree(105);
-    driveBackward(14.7, 10, 2);
-    armServo.SetDegree(30);
-    Sleep(2000);
-    driveForward(4, 10, 2);
-    armServo.SetDegree(0);
-    Sleep(4.0);
-    turnLeft(3, 60, 2);
-    driveBackward(3.8, 10, 2);
-    armServo.SetDegree(100);
-    Sleep(1000);
-
-    armServo.SetDegree(50);
-    driveForward(19.8, 10, 2);
-    armServo.SetDegree(210);
-    turnLeft(110, 60, 2);
-    driveBackward(30, 10, 3);
-    Sleep(250);
-    //driveForward(5.5, 10, 2);
-    /* Window Code
-    turnRight(100, 60, 5);
-    driveForward(8, 10, 2);
-    turnRight(100, 60, 2);
-
-    turnRight(100, 80, 5);
-    Sleep(100);
-    turnLeft(100, 80, 5);
-
-    turnRight(10, 40, 5);
-    driveBackward(5, 10, 2);*/
-
-    driveForward(35, 10, 3.0);
-    driveBackward(1.4, 10, 2);
-    turnLeft(105, 70, 5.0);
-    driveBackward(60, 15, 10.0);
-
+        Sleep(10);
+    }
     
     stopRun();
 }
