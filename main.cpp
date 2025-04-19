@@ -13,8 +13,8 @@
 #include <iostream>
 using namespace std;
 
-const bool offCourseTesting = true;
-const bool PID_ENABLED = true;
+const bool offCourseTesting = false;
+const bool PID_ENABLED = false;
 
 #define TEAM_ID_STRING "0150F3VKF"
 
@@ -69,7 +69,7 @@ const double DISTANCE_PER_COUNT = WHEEL_CIRCUMFERENCE / COUNTS_PER_REV;
 #define BLUE_THRESHOLD 1.131
 #define RED_THRESHOLD 0.445
 
-int rampAdjust = .17;
+int rampAdjust = .19;
 
 // Function declarations here
 void waitForTouch(char prgName[]);
@@ -269,9 +269,9 @@ int main(void)
     telemetry.writeLine(lever);
 
     driveBackward(4, 15, 3);
-    driveForward(2, 7, 3);
+    driveForward(0.08, 5, 3);
 
-    turnLeft(60, 60, 2);
+    turnLeft(51, 60, 3);
     driveForward(10, 5, 4);
 
     spinClockwise();
@@ -279,13 +279,19 @@ int main(void)
     spinCounterClockwise();
 
     driveBackward(1, 20, 3);
-    turnRight(99, 60, 3);
-    driveForward(17, 10, 4);
+    turnRight(160, 60, 10);
+    driveBackward(16, 10, 2);
+    driveForward(19.0, 10, 4);
 
-    turnRight(117, 60, 3);
+    turnRight(118, 60, 3);
     armServo.SetDegree(60);
-    driveBackward(10, 7, 5);
+    Sleep(.75);
+    turnLeft(7, 60, 2);
+    rampAdjust = .15;
+    driveBackward(10, 5, 5);
+    rampAdjust = .19;
     armServo.SetDegree(100);
+    Sleep(.75);
     Sleep(250);
 
     driveForward(10, 10, 3);
@@ -298,11 +304,11 @@ int main(void)
     driveForward(12, 10, 4);
 
     driveBackward(1.4, 10, 2);
-    turnRight(105, 60, 4);
+    turnRight(108, 60, 4);
 
-    rampAdjust = .17;
-    driveBackward(30, 20, 6);
-    rampAdjust = .17;
+    rampAdjust = .7;
+    driveBackward(37, 18, 6);
+    rampAdjust = .19;
 
     turnLeft(35, 60, 3);
     driveBackward(3, 10, 2);
@@ -318,7 +324,7 @@ int main(void)
     driveForward(14, 10, 3);
     turnLeft(45, 60, 2);
     armServo.SetDegree(105);
-    driveBackward(12.7, 10, 2);
+    driveBackward(14.7, 10, 2);
     armServo.SetDegree(30);
     Sleep(2000);
     driveForward(4, 10, 2);
@@ -330,9 +336,9 @@ int main(void)
     Sleep(1000);
 
     armServo.SetDegree(50);
-    driveForward(15.8, 10, 2);
-    armServo.SetDegree(180);
-    turnLeft(50, 60, 2);
+    driveForward(19.8, 10, 2);
+    armServo.SetDegree(210);
+    turnLeft(110, 60, 2);
     driveBackward(30, 10, 3);
     Sleep(250);
     //driveForward(5.5, 10, 2);
@@ -351,7 +357,7 @@ int main(void)
     driveForward(35, 10, 3.0);
     driveBackward(1.4, 10, 2);
     turnLeft(105, 70, 5.0);
-    driveForward(60, 15, 10.0);
+    driveBackward(60, 15, 10.0);
 
     
     stopRun();
@@ -370,7 +376,7 @@ int preRun(char prgName[]) {
         return 0;
     } else {
         connectRCS();
-        waitForTouch(prgName);
+        //waitForTouch(prgName);
         waitForStartLight(prgName);
         lever = RCS.GetLever();
         return RCS.GetLever();
@@ -390,6 +396,7 @@ void waitForTouch(char prgName[]) {
     LCD.Write(Battery.Voltage());
     LCD.WriteLine(" V");
     LCD.WriteLine("/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\");
+    Sleep(250);
 
     while(!LCD.Touch(&x,&y)); //Wait for screen to be pressed
     while(LCD.Touch(&x,&y)); //Wait for screen to be unpressed
@@ -542,7 +549,7 @@ float getLeftMotorPwr(float speed) {
     return (speed / WHEEL_CIRCUMFERENCE) * 32.15;
 }
 
-float getRightMotorPwr(float speed) {
+float getRightMotorPwr(float speed) { 
     float leftPower = getLeftMotorPwr(speed);
     return leftPower + rightMotorCorrection(leftPower);
 }
@@ -654,8 +661,8 @@ bool turnLeft(float deg, float speed, float timeout) {
     int leftTargetCounts = getEncoderCountsLeft(turnDist);
     int rightTargetCounts = getEncoderCountsRight(turnDist);
 
-    int leftPwr = getLeftMotorPwr(linearSpeed) * leftReverse;
-    int rightPwr = getRightMotorPwr(linearSpeed) * rightReverse;
+    int leftPwr = getLeftMotorPwr(linearSpeed);
+    int rightPwr = getRightMotorPwr(linearSpeed);
 
     float startTime = TimeNow();
     resetPID();
@@ -840,7 +847,7 @@ void updateParams(double lastErrorSet) {
 
 void spinClockwise() {
     spinner.SetPercent(70 * spinReverse);
-    Sleep(2000);
+    Sleep(2200);
     spinner.SetPercent(30 * spinReverse);
     Sleep(500);
     spinner.Stop();
@@ -848,7 +855,7 @@ void spinClockwise() {
 
 void spinCounterClockwise() {
     spinner.SetPercent(-70 * spinReverse);
-    Sleep(1800);
+    Sleep(2200);
     spinner.SetPercent(-30 * spinReverse);
     Sleep(500);
     spinner.Stop();
