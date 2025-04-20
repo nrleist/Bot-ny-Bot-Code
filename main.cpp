@@ -286,7 +286,7 @@ int main(void)
     turnRight(118, 60, 3);
     armServo.SetDegree(60);
     Sleep(.75);
-    turnLeft(7, 60, 2);
+    turnLeft(12.5, 60, 2);
     rampAdjust = .15;
     driveBackward(10, 5, 5);
     rampAdjust = .19;
@@ -305,6 +305,7 @@ int main(void)
 
     driveBackward(1.4, 10, 2);
     turnRight(108, 60, 4);
+    driveForward(7, 10, 3);
 
     rampAdjust = .7;
     driveBackward(37, 18, 6);
@@ -372,6 +373,7 @@ int preRun(char prgName[]) {
     armServoSetup();
     if(offCourseTesting) {
         waitForTouch(prgName);
+        waitForStartLight(prgName);
         lever = 0;
         return 0;
     } else {
